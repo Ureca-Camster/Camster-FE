@@ -13,14 +13,14 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-            <Route index element={MainPage} />
-            <Route path="login" element={<LoginPage />} />
-            <Route path="register" element={<RegisterPage />} />
-            <Route path="study/:studyNo" element={<StudyRoomPage />} />
-            <Route path="study/:studyNo/camstudy" element={<CamStudyPage />} />
-            <Route path="register" element={<RegisterPage />} />
-            <Route path="post-write" element={<PostWritePage />} />
-            <Route path="post/:postId" element={<PostViewPage />} />
+                <Route index element={<MainPage />} />
+                <Route path="login" element={<LoginPage />} />
+                <Route path="register" element={<RegisterPage />} />
+                <Route path="study/:studyNo" element={<StudyRoomPage />} />
+                <Route path="study/:studyNo/camstudy" element={<CamStudyPage />} />
+                <Route path="register" element={<RegisterPage />} />
+                <Route path="post-write" element={<PostWritePage />} />
+                <Route path="post/:postId" element={<PostViewPage />} />
             </Routes>
         </BrowserRouter>
     );
