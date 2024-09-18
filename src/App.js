@@ -8,6 +8,7 @@ import LoginPage from "./component/page/LoginPage";
 import RegisterPage from "./component/page/RegisterPage";
 import StudyRoomPage from "./component/page/StudyRoomPage";
 import CamStudyPage from "./component/page/CamStudyPage";
+import MyPage from "./component/page/MyPage";
 
 function App() {
     return (
@@ -16,9 +17,9 @@ function App() {
                 <Route index element={<MainPage />} />
                 <Route path="login" element={<LoginPage />} />
                 <Route path="register" element={<RegisterPage />} />
+                <Route path="mypage" element={<MyPage />} />
                 <Route path="study/:studyNo" element={<StudyRoomPage />} />
                 <Route path="study/:studyNo/camstudy" element={<CamStudyPage />} />
-                <Route path="register" element={<RegisterPage />} />
                 <Route path="post-write" element={<PostWritePage />} />
                 <Route path="post/:postId" element={<PostViewPage />} />
             </Routes>
