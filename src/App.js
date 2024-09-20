@@ -26,8 +26,8 @@ function App() {
                     <Route path="study/:studyNo/camstudy" element={<CamStudyPage />} />
                     <Route path="post-write" element={<PostWritePage />} />
                     <Route path="post/:postId" element={<PostViewPage />} />
-                    <Route path="/*" element={<NotFoundPage />} />
                 </Route>
+                <Route path="/*" element={<NotFoundPage />} />
             </Routes>
         </BrowserRouter>
     );
