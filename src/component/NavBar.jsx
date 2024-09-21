@@ -39,6 +39,7 @@ function NavBar(props) {
             <div className="navbar-links">
                 {isLoggedIn ? (
                     <>
+                    {/*  */}
                         <span onClick={()=>{navigate("/mypage")}} className="navbar-span navbar-username">{user.nickname}</span>
                         <span className="navbar-span">님</span>
                         <button onClick={handleLogoutButton} className="mybtn yellow rounded">로그아웃</button>

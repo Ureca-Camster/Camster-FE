@@ -1,9 +1,5 @@
 /* NavBar.css */
 /* Nav */
-* {
-    margin: 0;
-    font-family: 'GmarketSansMedium';
-}
 
 .navbar-custom {
     display: flex;
@@ -19,7 +15,7 @@
 .navbar-logo {
     display: flex;
     align-items: center;
-    padding-left: 20px;
+    padding-left: 10px;
     height: 100%;
 }
 
@@ -31,6 +27,9 @@
     margin: 0;
     padding: 0;
     cursor: pointer;
+}
+.navbar-logo-img:hover {
+    opacity: 90%;
 }
 
 /* Nickname */

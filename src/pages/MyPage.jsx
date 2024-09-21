@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { login } from '../store/loginSlice.ts';
 import { setUser } from '../store/userSlice.ts';
+import { useNavigate } from 'react-router-dom';
 
 function MyPage(props) {
     const dispatch = useDispatch();
     const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
     const user = useSelector((state) => state.user);
+    const navigate = useNavigate();
 
     const [nickname, setNickname] = useState('');
     const [goalTime, setGoalTime] = useState('');
@@ -100,8 +102,9 @@ function MyPage(props) {
                     <button className="mybtn skyblue rounded" type="submit">수정 완료</button>
                 </form>
             </div>
-        ) : (
-            <p>로그인되지 않음</p>
+        ) : (<div>
+            <p><span onClick={()=>navigate("/login")} className="login-link">로그인</span> 후 이용 가능합니다.</p>
+            </div>
         )}</>
     );
 }
