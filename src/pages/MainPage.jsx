@@ -7,7 +7,7 @@ function MainPage(props) {
     return (
         <div>
             <h1>MainPage</h1>
-            {/* <Rank /> */}
+            <Rank />
             <button onClick={() => {
                 window.open('register', '_blank');
             }}>Open Register in New Tab</button>
