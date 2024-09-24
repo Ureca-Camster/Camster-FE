@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // navigate import 추가
+import { useParams, useNavigate } from "react-router-dom";
+import { useAppSelector } from '../store/hooks.ts'; // Redux의 상태 가져오기
 
 function StudyRoomPage() {
   const { studyNo } = useParams();  // URL에서 studyNo 파라미터 가져오기
   const [studyRoom, setStudyRoom] = useState(null);
   const [posts, setPosts] = useState([]);  // 게시판 목록
-  const navigate = useNavigate();  // navigate 훅 사용
-  const isLoggedIn = false; // 로그인 여부 확인 (임시로 false로 설정)
+  const [isMember, setIsMember] = useState(false);  // 스터디 가입 여부 상태
+  const [isModalOpen, setIsModalOpen] = useState(false);  // 모달 상태 관리
+  const [isMemberListOpen, setIsMemberListOpen] = useState(false);  // 멤버 목록 모달 상태
+  const [postTitle, setPostTitle] = useState(""); // 게시물 제목 상태 관리
+  const [postContent, setPostContent] = useState(""); // 게시물 내용 상태 관리
+  const [members, setMembers] = useState([]);  // 가입된 멤버 목록
+  const [memberCount, setMemberCount] = useState(0);  // 가입된 멤버 수
+  const navigate = useNavigate();
+  const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);  // Redux에서 로그인 상태 가져오기
+  const user = useAppSelector((state) => state.user);  // Redux에서 사용자 정보 가져오기
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -14,7 +23,7 @@ function StudyRoomPage() {
       return;
     }
 
-    // 스터디룸 정보를 가져오는 API 호출 (fetch 사용)
+    // 스터디룸 정보를 가져오는 API 호출
     fetch(`http://localhost:8080/studies/${studyNo}`)
       .then((response) => {
         if (!response.ok) {
@@ -29,16 +38,65 @@ function StudyRoomPage() {
         console.error("스터디룸 정보를 불러오는데 실패했습니다.", error);
       });
 
-    // 게시판 목록을 가져오는 API 호출
-    fetch(`http://localhost:8080/studies/${studyNo}/posts`)
+      // 스터디 가입 여부 확인 및 멤버 수/목록 가져오는 API 호출
+      fetch(`http://localhost:8080/studies/${studyNo}/members`)
       .then((response) => response.json())
       .then((data) => {
-        setPosts(data);  // 게시판 목록 데이터를 상태에 저장
+        console.log("Fetched members data:", data);
+        if (Array.isArray(data)) {
+          setMemberCount(data.length); // 멤버 수 상태 업데이트
+          setMembers(data); // 멤버 목록 상태 업데이트
+          const isUserMember = data.some(member => member.memberId === user.id);
+          setIsMember(isUserMember);  // 가입 여부 업데이트
+        } else {
+          console.error("Invalid data format:", data);
+        }
       })
       .catch((error) => {
-        console.error("게시판 목록을 불러오는데 실패했습니다.", error);
+        console.error("Failed to check membership status and fetch members:", error);
       });
-  }, [studyNo, isLoggedIn, navigate]);
+    }, [studyNo, isLoggedIn, navigate, user.id]);
+
+  // 모달을 열거나 닫는 함수
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
+  // 멤버 목록 모달을 열거나 닫는 함수
+  const toggleMemberListModal = () => {
+    setIsMemberListOpen(!isMemberListOpen);
+  };
+
+  // 게시물 제출 함수
+const handlePostSubmit = () => {
+  const newPost = {
+    title: postTitle,
+    content: postContent,
+    nickname: user.nickname,  // 로그인한 유저의 닉네임
+    memberId: user.memberid,  // 로그인한 유저의 ID
+    studyId: studyNo,  // 현재 스터디 ID
+  };
+
+  fetch('http://localhost:8080/boards', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(newPost)
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log("Post submitted successfully:", data);
+    setPosts([...posts, data]);  // 새로 등록한 게시물을 게시판 목록에 추가
+  })
+  .catch(error => {
+    console.error("Failed to submit post:", error);
+  });
+  
+  setIsModalOpen(false);  // 모달 닫기
+  setPostTitle("");  // 제목 초기화
+  setPostContent("");  // 내용 초기화
+};
 
   if (!studyRoom) return <div>Loading...</div>;
 
@@ -51,35 +109,78 @@ function StudyRoomPage() {
         {/* 설명을 감싸는 추가된 상자 */}
         <div style={{ position: "relative", padding: "20px", border: "1px solid #ddd", borderRadius: "10px" }}>
           <p>{studyRoom.description}</p>
-          
-          {/* 연필 아이콘 - 우측 하단 */}
-          <img 
-            src="https://cdn-icons-png.flaticon.com/512/84/84380.png" 
-            alt="Edit" 
-            style={{ position: "absolute", bottom: "10px", right: "10px", width: "20px", height: "20px" }}
-          />
         </div>
         
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", marginTop: "20px" }}>
-          <span>인원수: {studyRoom.memberCount}명</span>
-          <button style={{ padding: "5px 10px", cursor: "pointer"}}>목록 보기</button>
-        </div>
-        
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
-          <button style={{ padding: "10px 20px"}}>
-            캠스터디 시작하기
-          </button>
-          <button style={{ padding: "10px 20px"}}>
-            탈퇴
-          </button>
+          <span>인원수: {memberCount}명</span>
+          <button style={{ padding: "5px 10px", cursor: "pointer"}} onClick={toggleMemberListModal}>목록 보기</button>
         </div>
       </div>
 
+      {/* 멤버 목록 팝업 */}
+      {isMemberListOpen && (
+        <div style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          padding: "30px",
+          width: "400px",
+          backgroundColor: "#fff",
+          border: "1px solid #ddd",
+          borderRadius: "10px",
+          zIndex: 1000,
+        }}>
+          <h2>가입된 멤버 목록</h2>
+          <ul>
+            {members.map(member => (
+              <li key={member.memberId}>{member.nickname}</li>
+            ))}
+          </ul>
+          <button onClick={toggleMemberListModal}>닫기</button>
+        </div>
+      )}
+
       {/* 오른쪽: 게시판 목록 */}
       <div style={{ flex: "6", border: "1px solid #ccc", padding: "20px", borderRadius: "10px", position: "relative" }}>
-        <button>+</button>새 게시물을 작성하세요
-        <button onClick={() => navigate("/")}>뒤로</button> {/* 뒤로가기 버튼 */}
+        <button onClick={toggleModal}>+</button>새 게시물을 작성하세요
+        <button onClick={() => navigate("/")}>뒤로</button>
       </div>
+
+      {/* 모달 팝업 */}
+      {isModalOpen && (
+        <div style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          padding: "30px",
+          width: "500px",
+          backgroundColor: "#fff",
+          border: "1px solid #ddd",
+          borderRadius: "10px",
+          zIndex: 1000,
+        }}>
+          <h2>새 게시물 작성</h2>
+          <input
+            type="text"
+            value={postTitle}
+            onChange={(e) => setPostTitle(e.target.value)}
+            placeholder="제목을 입력하세요"
+            style={{ width: "100%", padding: "10px", marginBottom: "10px", fontSize: "16px" }}
+          />
+          <textarea 
+            value={postContent} 
+            onChange={(e) => setPostContent(e.target.value)} 
+            placeholder="게시물 내용을 입력하세요..." 
+            style={{ width: "100%", height: "150px", padding: "10px", fontSize: "14px", marginBottom: "10px" }}
+          />
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <button onClick={handlePostSubmit} style={{ padding: "10px 20px", cursor: "pointer" }}>등록</button>
+            <button onClick={toggleModal} style={{ padding: "10px 20px", cursor: "pointer" }}>취소</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
