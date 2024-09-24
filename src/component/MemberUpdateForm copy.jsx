@@ -39,7 +39,8 @@ function MemberUpdateForm() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Update the redux value first
+        // Dispatch the login action with the updated values
+        dispatch(login());
         dispatch(
             setUser({
                 nickname,
@@ -48,7 +49,6 @@ function MemberUpdateForm() {
                 todayTime,
             })
         );
-        // Fetch request for the member info including password
 
         // Reset the password fields after processing if needed
         setNewPassword('');
