@@ -42,7 +42,9 @@ const Rank = () => {
     }, [dispatch, lastUpdated]);
 
     return (
-        <ListGroup className="mx-auto" style={{ maxWidth: '400px' }}>
+        <div>
+        <h3 style={{ width: '80%' , margin: "0 0 0 30px"}}>어제의 TOP3👑</h3>
+        <ListGroup className="mx-auto" style={{ maxWidth: '80%' }}>
             {ranks.slice(0, 3).map((rank, index) => (
                 <ListGroup.Item 
                     key={index} 
@@ -59,6 +61,7 @@ const Rank = () => {
                 </ListGroup.Item>
             ))}
         </ListGroup>
+        </div>
     );
 };
 
