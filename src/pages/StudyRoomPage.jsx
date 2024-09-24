@@ -55,6 +55,16 @@ function StudyRoomPage() {
       .catch((error) => {
         console.error("Failed to check membership status and fetch members:", error);
       });
+
+      // 게시물 목록을 가져오는 API 호출 추가
+  fetch(`http://localhost:8080/boards/study/${studyNo}`)
+  .then((response) => response.json())
+  .then((data) => {
+    setPosts(data);  // 게시물 목록을 상태에 저장
+  })
+  .catch((error) => {
+    console.error("Failed to fetch posts:", error);
+  });
     }, [studyNo, isLoggedIn, navigate, user.id]);
 
   // 모달을 열거나 닫는 함수
@@ -145,6 +155,24 @@ const handlePostSubmit = () => {
       <div style={{ flex: "6", border: "1px solid #ccc", padding: "20px", borderRadius: "10px", position: "relative" }}>
         <button onClick={toggleModal}>+</button>새 게시물을 작성하세요
         <button onClick={() => navigate("/")}>뒤로</button>
+
+        {/* 게시물 목록을 표시하는 부분 */}
+  <div style={{ marginTop: "20px" }}>
+    {posts.length > 0 ? (
+      <ul>
+        {posts.map((post) => (
+          <li key={post.boardId} style={{ marginBottom: "10px", borderBottom: "1px solid #ddd", paddingBottom: "10px" }}>
+            <h3>{post.title}</h3>
+            <p>{post.content}</p>
+            <p>작성자: {post.nickname || "알 수 없음"}</p>
+            <p>작성일: {new Date(post.createDate).toLocaleString()}</p>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p>게시물이 없습니다.</p>
+    )}
+  </div>
       </div>
 
       {/* 모달 팝업 */}
