@@ -20,16 +20,15 @@ function NavBar(props) {
             },
             body: JSON.stringify({
                 email: 'hong@ureca.com',
-                password: 'password123' // 실제 비밀번호 입력
+                password: 'password123'
             })
         })
         .then(response => response.json())
         .then(data => {
-            // 로그인 성공 시 Redux에 사용자 정보를 저장
-            console.log("Login data:", data);  // 로그인 성공 시 데이터를 출력
+            console.log('Login data:', data); // 로그로 확인
             dispatch(login());
             dispatch(setUser({
-                memberid: data.memberid,  // member_id 저장
+                memberId: data.memberId,  // Redux에 memberId 저장
                 nickname: data.nickname,
                 email: data.email,
                 goalTime: data.goalTime,
