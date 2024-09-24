@@ -82,8 +82,8 @@ const handlePostSubmit = () => {
   const newPost = {
     title: postTitle,
     content: postContent,
-    nickname: user.nickname,  // 로그인한 유저의 닉네임
-    memberId: user.memberid,  // 로그인한 유저의 ID
+    
+    memberId: user.memberId,  // 로그인한 유저의 ID
     studyId: studyNo,  // 현재 스터디 ID
   };
 
