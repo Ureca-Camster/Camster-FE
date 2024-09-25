@@ -25,7 +25,7 @@ function App() {
                     <Route path="study/:studyNo" element={<StudyRoomPage />} />
                     <Route path="study/:studyNo/camstudy" element={<CamStudyPage />} />
                     <Route path="post-write" element={<PostWritePage />} />
-                    <Route path="post/:postId" element={<PostViewPage />} />
+                    <Route path="post/:boardId" element={<PostViewPage />} />
                 </Route>
                 <Route path="/*" element={<NotFoundPage />} />
             </Routes>
