@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAppSelector } from '../store/hooks.ts'; // Redux의 상태 가져오기
 
 function StudyRoomPage() {
@@ -7,6 +7,8 @@ function StudyRoomPage() {
   const [studyRoom, setStudyRoom] = useState(null);
   const [posts, setPosts] = useState([]);  // 게시판 목록
   const [isMember, setIsMember] = useState(false);  // 스터디 가입 여부 상태
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);  // 수정 모달 상태
+  const [editedDescription, setEditedDescription] = useState("");  // 수정될 설명 상태
   const [isModalOpen, setIsModalOpen] = useState(false);  // 모달 상태 관리
   const [isMemberListOpen, setIsMemberListOpen] = useState(false);  // 멤버 목록 모달 상태
   const [postTitle, setPostTitle] = useState(""); // 게시물 제목 상태 관리
@@ -24,22 +26,23 @@ function StudyRoomPage() {
     }
 
     // 스터디룸 정보를 가져오는 API 호출
-    fetch(`http://localhost:8080/studies/${studyNo}`)
-      .then((response) => {
+    fetch(http://localhost:8080/studies/${studyNo})
+      .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch study room data');
         }
         return response.json();  // 응답을 JSON으로 변환
       })
-      .then((data) => {
+      .then(data => {
         setStudyRoom(data);  // 스터디룸 데이터를 상태에 저장
+        setEditedDescription(data.description);  // 수정 시 기본값으로 설명 설정
       })
-      .catch((error) => {
+      .catch(error => {
         console.error("스터디룸 정보를 불러오는데 실패했습니다.", error);
       });
 
       // 스터디 가입 여부 확인 및 멤버 수/목록 가져오는 API 호출
-      fetch(`http://localhost:8080/studies/${studyNo}/members`)
+      fetch(http://localhost:8080/studies/${studyNo}/members)
       .then((response) => response.json())
       .then((data) => {
         console.log("Fetched members data:", data);
@@ -57,7 +60,7 @@ function StudyRoomPage() {
       });
 
       // 게시물 목록을 가져오는 API 호출 추가
-  fetch(`http://localhost:8080/boards/study/${studyNo}`)
+  fetch(http://localhost:8080/boards/study/${studyNo})
   .then((response) => response.json())
   .then((data) => {
     setPosts(data);  // 게시물 목록을 상태에 저장
@@ -71,6 +74,8 @@ function StudyRoomPage() {
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
+
+  
 
   // 멤버 목록 모달을 열거나 닫는 함수
   const toggleMemberListModal = () => {
@@ -162,7 +167,9 @@ const handlePostSubmit = () => {
       <ul>
         {posts.map((post) => (
           <li key={post.boardId} style={{ marginBottom: "10px", borderBottom: "1px solid #ddd", paddingBottom: "10px" }}>
+            <Link to={/post/${post.boardId}}>
             <h3>{post.title}</h3>
+            </Link>
             <p>{post.content}</p>
             <p>작성자: {post.nickname || "알 수 없음"}</p>
             <p>작성일: {new Date(post.createDate).toLocaleString()}</p>
