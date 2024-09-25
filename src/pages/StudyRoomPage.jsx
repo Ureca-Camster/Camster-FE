@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAppSelector } from '../store/hooks.ts'; // Redux의 상태 가져오기
+import { FaEdit } from 'react-icons/fa';  // 설치 필요: npm install react-icons
 
 function StudyRoomPage() {
   const { studyNo } = useParams();  // URL에서 studyNo 파라미터 가져오기
@@ -45,7 +46,6 @@ function StudyRoomPage() {
     fetch(`http://localhost:8080/studies/${studyNo}/members`)
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched members data:", data);
         if (Array.isArray(data)) {
           setMemberCount(data.length); // 멤버 수 상태 업데이트
           setMembers(data); // 멤버 목록 상태 업데이트
@@ -70,6 +70,11 @@ function StudyRoomPage() {
       });
   }, [studyNo, isLoggedIn, navigate, user.id]);
 
+  // 수정 모달 열기/닫기
+  const toggleEditModal = () => {
+    setIsEditModalOpen(!isEditModalOpen);
+  };
+
   // 모달을 열거나 닫는 함수
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -80,12 +85,37 @@ function StudyRoomPage() {
     setIsMemberListOpen(!isMemberListOpen);
   };
 
+  // 설명 수정 함수
+  const handleDescriptionUpdate = () => {
+    const updatedStudyRoom = {
+      ...studyRoom,
+      description: editedDescription,
+    };
+
+    fetch(`http://localhost:8080/studies/${studyNo}?loggedInMemberId=${user.memberId}`, {
+      method: 'PUT',  // PUT 요청으로 수정
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedStudyRoom)
+    })
+    .then(response => response.json())
+    .then(data => {
+      setStudyRoom(data);  // 수정된 스터디룸 데이터를 상태에 저장
+      toggleEditModal();  // 모달 닫기
+    })
+    .catch(error => {
+      console.error("스터디룸 설명 수정에 실패했습니다.", error);
+    });
+  };
+
   // 게시물 제출 함수
   const handlePostSubmit = () => {
     const newPost = {
       title: postTitle,
       content: postContent,
       memberId: user.memberId,  // 로그인한 유저의 ID
+      nickname: user.nickname,
       studyId: studyNo,  // 현재 스터디 ID
     };
 
@@ -98,7 +128,6 @@ function StudyRoomPage() {
     })
       .then(response => response.json())
       .then(data => {
-        console.log("Post submitted successfully:", data);
         setPosts([...posts, data]);  // 새로 등록한 게시물을 게시판 목록에 추가
       })
       .catch(error => {
@@ -121,8 +150,14 @@ function StudyRoomPage() {
         {/* 설명을 감싸는 추가된 상자 */}
         <div style={{ position: "relative", padding: "20px", border: "1px solid #ddd", borderRadius: "10px" }}>
           <p>{studyRoom.description}</p>
+          {/* 연필 아이콘 (로그인한 유저가 스터디 방을 만들었을 때만 보임) */}
+          {user.memberId === studyRoom.memberId && (
+            <FaEdit
+              style={{ position: "absolute", bottom: "10px", right: "10px", cursor: "pointer", width: "20px", height: "20px" }}
+              onClick={toggleEditModal}  // 클릭하면 수정 모달 열기
+            />
+          )}
         </div>
-
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", marginTop: "20px" }}>
           <span>인원수: {memberCount}명</span>
           <button style={{ padding: "5px 10px", cursor: "pointer" }} onClick={toggleMemberListModal}>목록 보기</button>
@@ -210,6 +245,34 @@ function StudyRoomPage() {
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <button onClick={handlePostSubmit} style={{ padding: "10px 20px", cursor: "pointer" }}>등록</button>
             <button onClick={toggleModal} style={{ padding: "10px 20px", cursor: "pointer" }}>취소</button>
+          </div>
+        </div>
+      )}
+
+      {/* 설명 수정 모달 */}
+      {isEditModalOpen && (
+        <div style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          padding: "30px",
+          width: "500px",
+          backgroundColor: "#fff",
+          border: "1px solid #ddd",
+          borderRadius: "10px",
+          zIndex: 1000,
+        }}>
+          <h2>스터디 설명 수정</h2>
+          <textarea
+            value={editedDescription}
+            onChange={(e) => setEditedDescription(e.target.value)}
+            placeholder="스터디 설명을 수정하세요..."
+            style={{ width: "100%", height: "150px", padding: "10px", fontSize: "14px", marginBottom: "10px" }}
+          />
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <button onClick={handleDescriptionUpdate} style={{ padding: "10px 20px", cursor: "pointer" }}>저장</button>
+            <button onClick={toggleEditModal} style={{ padding: "10px 20px", cursor: "pointer" }}>취소</button>
           </div>
         </div>
       )}
