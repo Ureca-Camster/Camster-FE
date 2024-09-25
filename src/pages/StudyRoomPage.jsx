@@ -26,7 +26,7 @@ function StudyRoomPage() {
     }
 
     // 스터디룸 정보를 가져오는 API 호출
-    fetch(http://localhost:8080/studies/${studyNo})
+    fetch(`http://localhost:8080/studies/${studyNo}`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch study room data');
@@ -41,8 +41,8 @@ function StudyRoomPage() {
         console.error("스터디룸 정보를 불러오는데 실패했습니다.", error);
       });
 
-      // 스터디 가입 여부 확인 및 멤버 수/목록 가져오는 API 호출
-      fetch(http://localhost:8080/studies/${studyNo}/members)
+    // 스터디 가입 여부 확인 및 멤버 수/목록 가져오는 API 호출
+    fetch(`http://localhost:8080/studies/${studyNo}/members`)
       .then((response) => response.json())
       .then((data) => {
         console.log("Fetched members data:", data);
@@ -59,23 +59,21 @@ function StudyRoomPage() {
         console.error("Failed to check membership status and fetch members:", error);
       });
 
-      // 게시물 목록을 가져오는 API 호출 추가
-  fetch(http://localhost:8080/boards/study/${studyNo})
-  .then((response) => response.json())
-  .then((data) => {
-    setPosts(data);  // 게시물 목록을 상태에 저장
-  })
-  .catch((error) => {
-    console.error("Failed to fetch posts:", error);
-  });
-    }, [studyNo, isLoggedIn, navigate, user.id]);
+    // 게시물 목록을 가져오는 API 호출 추가
+    fetch(`http://localhost:8080/boards/study/${studyNo}`)
+      .then((response) => response.json())
+      .then((data) => {
+        setPosts(data);  // 게시물 목록을 상태에 저장
+      })
+      .catch((error) => {
+        console.error("Failed to fetch posts:", error);
+      });
+  }, [studyNo, isLoggedIn, navigate, user.id]);
 
   // 모달을 열거나 닫는 함수
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
-
-  
 
   // 멤버 목록 모달을 열거나 닫는 함수
   const toggleMemberListModal = () => {
@@ -83,35 +81,34 @@ function StudyRoomPage() {
   };
 
   // 게시물 제출 함수
-const handlePostSubmit = () => {
-  const newPost = {
-    title: postTitle,
-    content: postContent,
-    
-    memberId: user.memberId,  // 로그인한 유저의 ID
-    studyId: studyNo,  // 현재 스터디 ID
-  };
+  const handlePostSubmit = () => {
+    const newPost = {
+      title: postTitle,
+      content: postContent,
+      memberId: user.memberId,  // 로그인한 유저의 ID
+      studyId: studyNo,  // 현재 스터디 ID
+    };
 
-  fetch('http://localhost:8080/boards', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(newPost)
-  })
-  .then(response => response.json())
-  .then(data => {
-    console.log("Post submitted successfully:", data);
-    setPosts([...posts, data]);  // 새로 등록한 게시물을 게시판 목록에 추가
-  })
-  .catch(error => {
-    console.error("Failed to submit post:", error);
-  });
-  
-  setIsModalOpen(false);  // 모달 닫기
-  setPostTitle("");  // 제목 초기화
-  setPostContent("");  // 내용 초기화
-};
+    fetch('http://localhost:8080/boards', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newPost)
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Post submitted successfully:", data);
+        setPosts([...posts, data]);  // 새로 등록한 게시물을 게시판 목록에 추가
+      })
+      .catch(error => {
+        console.error("Failed to submit post:", error);
+      });
+
+    setIsModalOpen(false);  // 모달 닫기
+    setPostTitle("");  // 제목 초기화
+    setPostContent("");  // 내용 초기화
+  };
 
   if (!studyRoom) return <div>Loading...</div>;
 
@@ -120,15 +117,15 @@ const handlePostSubmit = () => {
       {/* 왼쪽: 스터디 제목, 설명, 인원수, 버튼들 */}
       <div style={{ flex: "4", border: "1px solid #ccc", padding: "20px", borderRadius: "10px" }}>
         <h1>{studyRoom.studyName} 스터디룸</h1>
-        
+
         {/* 설명을 감싸는 추가된 상자 */}
         <div style={{ position: "relative", padding: "20px", border: "1px solid #ddd", borderRadius: "10px" }}>
           <p>{studyRoom.description}</p>
         </div>
-        
+
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", marginTop: "20px" }}>
           <span>인원수: {memberCount}명</span>
-          <button style={{ padding: "5px 10px", cursor: "pointer"}} onClick={toggleMemberListModal}>목록 보기</button>
+          <button style={{ padding: "5px 10px", cursor: "pointer" }} onClick={toggleMemberListModal}>목록 보기</button>
         </div>
       </div>
 
@@ -162,24 +159,24 @@ const handlePostSubmit = () => {
         <button onClick={() => navigate("/")}>뒤로</button>
 
         {/* 게시물 목록을 표시하는 부분 */}
-  <div style={{ marginTop: "20px" }}>
-    {posts.length > 0 ? (
-      <ul>
-        {posts.map((post) => (
-          <li key={post.boardId} style={{ marginBottom: "10px", borderBottom: "1px solid #ddd", paddingBottom: "10px" }}>
-            <Link to={/post/${post.boardId}}>
-            <h3>{post.title}</h3>
-            </Link>
-            <p>{post.content}</p>
-            <p>작성자: {post.nickname || "알 수 없음"}</p>
-            <p>작성일: {new Date(post.createDate).toLocaleString()}</p>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p>게시물이 없습니다.</p>
-    )}
-  </div>
+        <div style={{ marginTop: "20px" }}>
+          {posts.length > 0 ? (
+            <ul>
+              {posts.map((post) => (
+                <li key={post.boardId} style={{ marginBottom: "10px", borderBottom: "1px solid #ddd", paddingBottom: "10px" }}>
+                  <Link to={`/post/${post.boardId}`}>
+                    <h3>{post.title}</h3>
+                  </Link>
+                  <p>{post.content}</p>
+                  <p>작성자: {post.nickname || "알 수 없음"}</p>
+                  <p>작성일: {new Date(post.createDate).toLocaleString()}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>게시물이 없습니다.</p>
+          )}
+        </div>
       </div>
 
       {/* 모달 팝업 */}
@@ -204,10 +201,10 @@ const handlePostSubmit = () => {
             placeholder="제목을 입력하세요"
             style={{ width: "100%", padding: "10px", marginBottom: "10px", fontSize: "16px" }}
           />
-          <textarea 
-            value={postContent} 
-            onChange={(e) => setPostContent(e.target.value)} 
-            placeholder="게시물 내용을 입력하세요..." 
+          <textarea
+            value={postContent}
+            onChange={(e) => setPostContent(e.target.value)}
+            placeholder="게시물 내용을 입력하세요..."
             style={{ width: "100%", height: "150px", padding: "10px", fontSize: "14px", marginBottom: "10px" }}
           />
           <div style={{ display: "flex", justifyContent: "space-between" }}>
