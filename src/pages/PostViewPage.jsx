@@ -9,45 +9,32 @@ function PostViewPage() {
   const [editedContent, setEditedContent] = useState("");
   const [comments, setComments] = useState([]);  // 댓글 상태
   const [newComment, setNewComment] = useState("");  // 새 댓글 입력 상태
-  const [editingCommentId, setEditingCommentId] = useState(null);  // 수정 중인 댓글 ID
-  const [editedCommentContent, setEditedCommentContent] = useState("");  // 수정 중인 댓글 내용
+  const [editingCommentId, setEditingCommentId] = useState(null);  // 수정 중인 댓글 ID 상태
+  const [editedCommentContent, setEditedCommentContent] = useState("");  // 수정 중인 댓글 내용 상태
+  const [isEditingPost, setIsEditingPost] = useState(false);  // 게시물 수정 모드
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.user);
 
   useEffect(() => {
     // 게시물 정보를 가져오는 API 호출
-  fetch(`http://localhost:8080/boards/${boardId}`)
-    .then(response => response.json())
-    .then(data => {
-      setPost(data);
-      setEditedTitle(data.title);
-      setEditedContent(data.content);
-    })
-    .catch(error => console.error("게시물 정보를 불러오는데 실패했습니다.", error));
+    fetch(`http://localhost:8080/boards/${boardId}`)
+      .then(response => response.json())
+      .then(data => {
+        setPost(data);
+        setEditedTitle(data.title);
+        setEditedContent(data.content);
+      })
+      .catch(error => console.error("게시물 정보를 불러오는데 실패했습니다.", error));
 
-  // 댓글 리스트를 가져오는 API 호출
-  fetch(`http://localhost:8080/comments/board/${boardId}`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("댓글 데이터를 가져오는데 실패했습니다.");
-      }
-      return response.json();  // 응답을 JSON으로 변환
-    })
-    .then(data => {
-      console.log("서버로부터 받은 댓글 데이터:", data);  // 서버로부터 받은 데이터 확인
-      if (Array.isArray(data)) {
-        setComments(data);  // 배열이면 상태에 저장
-      } else {
-        console.error("데이터 형식이 올바르지 않습니다:", data);
-      }
-    })
-    .catch(error => {
-      console.error("댓글 정보를 불러오는데 실패했습니다.", error);
-    });
-}, [boardId]);
-
-  // 렌더링될 때 comments 확인
-  console.log("렌더링 시점의 comments 상태:", comments);
+    // 댓글 리스트를 가져오는 API 호출
+    fetch(`http://localhost:8080/comments/board/${boardId}`)
+      .then(response => response.json())
+      .then(data => setComments(Array.isArray(data) ? data : []))
+      .catch(error => {
+        console.error("댓글 정보를 불러오는데 실패했습니다.", error);
+        setComments([]);  // 오류 발생 시 빈 배열로 설정
+      });
+  }, [boardId]);
 
   // 게시물 수정 함수
   const handleEditSubmit = () => {
@@ -70,6 +57,7 @@ function PostViewPage() {
         })
         .then(data => {
           setPost(data);
+          setIsEditingPost(false);  // 게시물 수정 모드 종료
           alert("게시물이 성공적으로 수정되었습니다.");
         })
         .catch(error => {
@@ -77,6 +65,11 @@ function PostViewPage() {
           alert("게시물 수정에 실패했습니다.");
         });
     }
+  };
+
+  // 게시물 수정 모드로 전환
+  const toggleEditPost = () => {
+    setIsEditingPost(!isEditingPost);
   };
 
   // 게시물 삭제 함수
@@ -177,16 +170,19 @@ function PostViewPage() {
   if (!post) return <div>Loading...</div>;
 
   return (
-    <div style={{ display: "flex", gap: "20px", padding: "20px", maxWidth: "1200px", margin: "0 auto", position: "relative" }}>
+    <div style={{ display: "flex", flexDirection: "column", padding: "20px", maxWidth: "1200px", margin: "0 auto", position: "relative", height: "90vh", overflow: "hidden" }}>
       <div style={{ 
-        flex: "4", 
+        flex: "1", 
         border: "1px solid #8BC9FF",  
         padding: "20px", 
         borderRadius: "20px", 
         boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", 
-        position: "relative" 
+        position: "relative",
+        overflowY: "auto",  // 스크롤이 필요할 때 스크롤바 생성
+        height: "100%", 
+        overflowX: "hidden" 
       }}>
-        {/* 뒤로 버튼 - 좌측 상단에 고정 */}
+        {/* 뒤로 버튼 */}
         <button 
           onClick={() => navigate(-1)} 
           className="custom-btn back-btn"
@@ -194,162 +190,150 @@ function PostViewPage() {
             position: "absolute", 
             top: "20px", 
             left: "20px", 
-            zIndex: 1  /* 뒤로 버튼이 제목보다 위에 있도록 설정 */
+            zIndex: 1
           }}  
         >
           뒤로
         </button>
 
-        {/* 수정 및 삭제 버튼 - 우측 상단에 고정 */}
+        {/* 게시물 수정 및 삭제 버튼 */}
         {user.memberId === post.memberId && (
-          <div style={{ position: "absolute", top: "20px", right: "20px" }}>  {/* 우측 상단에 고정 */}
-            <button 
-              onClick={handleEditSubmit} 
-              className="custom-btn"
-              style={{ marginRight: "10px" }}
-            >
-              수정
+          <div style={{ position: "absolute", top: "20px", right: "20px" }}>
+            <button onClick={toggleEditPost} className="custom-btn" style={{ marginRight: "10px" }}>
+              {isEditingPost ? "수정 취소" : "수정"}
             </button>
-            <button 
-              onClick={handleDelete} 
-              className="custom-btn"
-            >
+            <button onClick={handleDelete} className="custom-btn">
               삭제
             </button>
           </div>
         )}
 
-        {/* 제목 - 수정 가능한 input 또는 읽기 전용 */}
-        {user.memberId === post.memberId ? (
-          <input
-            type="text"
-            value={editedTitle}
-            onChange={(e) => setEditedTitle(e.target.value)}
-            style={{
-              width: "100%",  /* 너비를 100%로 설정하여 제목란이 전체를 차지하도록 */
-              padding: "10px",
-              marginTop: "60px",  /* 뒤로 버튼과의 간격을 위한 여백 추가 */
-              marginBottom: "10px",
-              borderRadius: "10px",
-              border: "1px solid #8BC9FF"
-            }}
-            placeholder="제목을 입력하세요"
-          />
-        ) : (
-          <h1 style={{ marginTop: "60px" }}>{post.title}</h1>  /* 제목과 뒤로 버튼의 간격 */
-        )}
-
-        {/* 작성자 및 작성일 */}
-        <p>작성자: {post.nickname}</p>
-        <p>작성일: {new Date(post.createDate).toLocaleString()}</p>
-
-        {/* 내용 - 수정 가능한 textarea 또는 읽기 전용 */}
-        {user.memberId === post.memberId ? (
-          <textarea
-            value={editedContent}
-            onChange={(e) => setEditedContent(e.target.value)}
-            style={{
-              width: "100%", 
-              height: "200px", 
-              padding: "10px", 
-              marginBottom: "10px", 
-              borderRadius: "10px", 
-              border: "1px solid #8BC9FF"
-            }}
-            placeholder="내용을 입력하세요"
-          />
+        {/* 게시물 제목 및 내용 */}
+        {isEditingPost ? (
+          <>
+            <input
+              type="text"
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              style={{ width: "100%", padding: "10px", marginTop: "60px", marginBottom: "10px", borderRadius: "10px", border: "1px solid #8BC9FF" }}
+              placeholder="제목을 입력하세요"
+            />
+            <textarea
+              value={editedContent}
+              onChange={(e) => setEditedContent(e.target.value)}
+              style={{ width: "100%", height: "200px", padding: "10px", marginBottom: "10px", borderRadius: "10px", border: "1px solid #8BC9FF" }}
+              placeholder="내용을 입력하세요"
+            />
+            <button onClick={handleEditSubmit} className="custom-btn">
+              저장
+            </button>
+          </>
         ) : (
           <>
+            <h1 style={{ marginTop: "60px" }}>{post.title}</h1>
             <p>{post.content}</p>
-            <hr style={{ borderTop: "1px solid #8BC9FF", margin: "20px 0" }} /> {/* 구분선 색상 */}
-
-            {/* 댓글 리스트 표시 */}
-            <h3>댓글</h3>
-            {comments.length > 0 ? (
-              <ul>
-                {comments.map(comment => (
-                  <li key={comment.commentId} style={{ marginBottom: "20px" }}>
-                    {editingCommentId === comment.commentId ? (
-                      <>
-                        <textarea
-                          value={editedCommentContent}
-                          onChange={(e) => setEditedCommentContent(e.target.value)}
-                          style={{ width: "100%", height: "80px", marginBottom: "10px" }}
-                        />
-                        <button onClick={() => handleSaveEditedComment(comment.commentId)} className="custom-btn">
-                          저장
-                        </button>
-                        <button onClick={() => setEditingCommentId(null)} className="custom-btn">
-                          취소
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <p>{comment.content}</p>
-                        <div style={{ fontSize: "12px", color: "gray" }}>
-                          <p>작성자: {comment.nickname || "알 수 없음"}</p>
-                          <p>작성일: {new Date(comment.createdDate).toLocaleString()}</p>
-                        </div>
-                        {(user.memberId === post.memberId || user.memberId === comment.memberId) && (
-                          <>
-                            <button 
-                              onClick={() => handleEditComment(comment.commentId, comment.content)} 
-                              className="custom-btn"
-                              style={{ marginTop: "10px" }}
-                            >
-                              수정
-                            </button>
-                            <button 
-                              onClick={() => handleDeleteComment(comment.commentId)} 
-                              className="custom-btn"
-                              style={{ marginTop: "10px" }}
-                            >
-                              삭제
-                            </button>
-                          </>
-                        )}
-                      </>
-                    )}
-                  </li>
-                ))}
-              </ul>
-              
-            ) : (
-              <p>댓글이 없습니다.</p>
-            )}
-
-          {/* 새 댓글 입력 */}
-          <textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="댓글을 입력하세요"
-            style={{ width: "100%", padding: "10px", marginBottom: "10px", borderRadius: "10px", border: "1px solid #8BC9FF" }}
-          />
-          <button onClick={handleAddComment} className="custom-btn">댓글 달기</button>
+            <p>작성자: {post.nickname}</p>
+            <p>작성일: {new Date(post.createDate).toLocaleString()}</p>
           </>
         )}
+
+        <hr style={{ borderTop: "1px solid #8BC9FF", margin: "20px 0" }} />
+
+        {/* 댓글 리스트 */}
+        <h3>댓글</h3>
+        {comments.length > 0 ? (
+          <ul>
+            {comments.map(comment => (
+              <li key={comment.commentId} style={{ marginBottom: "20px" }}>
+                {editingCommentId === comment.commentId ? (
+                  <>
+                    <textarea
+                      value={editedCommentContent}
+                      onChange={(e) => setEditedCommentContent(e.target.value)}
+                      style={{ width: "100%", height: "80px", marginBottom: "10px" }}
+                    />
+                    <button onClick={() => handleSaveEditedComment(comment.commentId)} className="custom-btn">
+                      저장
+                    </button>
+                    <button onClick={() => setEditingCommentId(null)} className="custom-btn">
+                      취소
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p>{comment.content}</p>
+                    <div style={{ fontSize: "12px", color: "gray" }}>
+                      <p>작성자: {comment.nickname || "알 수 없음"}</p>
+                      <p>작성일: {new Date(comment.createdDate).toLocaleString()}</p>
+                    </div>
+                    {(user.memberId === post.memberId || user.memberId === comment.memberId) && (
+                      <>
+                        <button 
+                          onClick={() => handleEditComment(comment.commentId, comment.content)} 
+                          className="custom-btn"
+                          style={{ marginTop: "10px" }}
+                        >
+                          수정
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteComment(comment.commentId)} 
+                          className="custom-btn"
+                          style={{ marginTop: "10px" }}
+                        >
+                          삭제
+                        </button>
+                      </>
+                    )}
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>댓글이 없습니다.</p>
+        )}
+
+        {/* 새 댓글 입력 */}
+        <textarea
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="댓글을 입력하세요"
+          style={{ width: "100%", padding: "10px", marginBottom: "10px", borderRadius: "10px", border: "1px solid #8BC9FF" }}
+        />
+        <button onClick={handleAddComment} className="custom-btn">댓글 달기</button>
       </div>
 
-      {/* 스타일 추가 */}
+      {/* 스크롤바 스타일 */}
       <style>
-        {`
-          .custom-btn {
-            padding: 5px 10px;
-            border: 1px solid #8BC9FF;
-            background-color: white;
-            color: black;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-          }
-          .custom-btn:hover {
-            background-color: #8BC9FF;
-            color: white;
-          }
-        `}
+      {`
+        ::-webkit-scrollbar {
+          width: 10px;
+          border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+          background-color: #8BC9FF;
+          border-radius: 10px;
+        }
+        ::-webkit-scrollbar-track {
+          background-color: #f5f5f5;
+        }
+        .custom-btn {
+          padding: 5px 10px;
+          border: 1px solid #8BC9FF;
+          background-color: white;
+          color: black;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+        .custom-btn:hover {
+          background-color: #8BC9FF;
+          color: white;
+        }
+      `}
       </style>
     </div>
-  ); 
+  );
 }
 
 export default PostViewPage;
