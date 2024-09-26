@@ -12,14 +12,14 @@ function NavBar(props) {
     const user = useSelector((state) => state.user);
     const navigate = useNavigate();
     function handleLoginButton() {
-        // navigate("/login");
-        dispatch(login());
-        dispatch(setUser({
-            nickname: '홍길동', 
-            email: 'hong@ureca.com',
-            goalTime: 10000,
-            todayTime: 8000,
-        }));
+        navigate("/login");
+        // dispatch(login());
+        // dispatch(setUser({
+        //     nickname: '홍길동', 
+        //     email: 'hong@ureca.com',
+        //     goalTime: 10000,
+        //     todayTime: 8000,
+        // }));
     }
     function handleLogoutButton() {
         dispatch(logout());
