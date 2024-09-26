@@ -1,13 +1,14 @@
 import React from 'react';
-import NavBar from './NavBar'; // NavBar import
+import NavBar from './NavBar';
 import { Outlet } from 'react-router-dom';
+import './Layout.css'; // 새로운 CSS 파일을 import합니다
 
 function Layout() {
     return (
-        <div>
-            <NavBar /> {/* 모든 페이지에서 공통으로 사용 */}
-            <main>
-                <Outlet /> {/* 현재 라우트에 맞는 페이지가 렌더링됨 */}
+        <div className="layout">
+            <NavBar />
+            <main className="content">
+                <Outlet />
             </main>
         </div>
     );

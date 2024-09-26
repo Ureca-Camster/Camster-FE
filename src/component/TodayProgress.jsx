@@ -34,19 +34,20 @@ const ProgressBarContainer = styled.div`
 const DateTextContainer = styled.div`
     width: 100%;
     overflow: hidden;
+    margin-bottom: -10px;
 `;
 
 const DateText = styled.div`
     display: inline-block;
     text-align: left;
-    font-weight: 700;
+    font-weight: 500;
+    -webkit-text-stroke: 2px black;
     font-size: 3.2rem;
     font-family: 'Krona One', sans-serif;
     line-height: 1.2;
     white-space: nowrap;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-shadow: 0.5px 0 0 currentColor;
     transform: translateZ(0);
     will-change: transform;
     color: #000;
@@ -66,6 +67,7 @@ const ProgressBar = styled.div`
 const Progress = styled.div`
     width: ${(props) => props.width}%;
     height: 35px;
+    border-right: 2px solid black;
     background: ${(props) =>
         props.isLoggedIn ? "#46A9FF" : "linear-gradient(90deg, #46A9FF 0%, #ffffff 90%)"};
 `;
@@ -156,7 +158,7 @@ function TodayProgress() {
         <>
             <GlobalStyle />
             <ProgressBarContainer>
-                <DateTextContainer style={{width: `${progressWidth}%`}}>
+                <DateTextContainer>
                     <DateText ref={dateTextRef}>
                         {currentDate}
                     </DateText>

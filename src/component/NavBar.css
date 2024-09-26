@@ -69,9 +69,9 @@
     text-align: center;
     color: white;
     text-decoration: none;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
-    margin: 5px 5px 9px 5px;
+    margin: 5px 10px 9px 5px;
 }
 .mybtn:active {
     top: 4px;
@@ -90,6 +90,11 @@
     padding: 7px 0 0 0; /* Adjust vertical padding */
     margin: 10px 0 0 0;
 }
+
+.mybtn.red {box-shadow:0px 4px 0px #E04342;}
+.mybtn.red:active {box-shadow: 0 0 #ff4c4b; background-color: #ff4c4b;}
+.mybtn.yellow {box-shadow:0px 4px 0px #D1B757;}
+.mybtn.yellow:active {box-shadow: 0 0 #fadb6a; background-color: #fadb6a;}
 
 .mybtn.skyblue:active {
     box-shadow: 0 0 #7ec3fe; 

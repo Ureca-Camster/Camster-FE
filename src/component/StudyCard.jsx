@@ -1,9 +1,18 @@
 import React from 'react';
 import './StudyCard.css';
 
-const StudyCard = ({ studyName, description, emoji, isPublic }) => {
+const StudyCard = ({ studyId, studyName, description, emoji, isPublic, onClick, isClickable }) => {
+  const handleClick = () => {
+    if (isClickable && onClick) {
+      onClick(studyId, isPublic);
+    }
+  };
+
   return (
-    <div className="study-card">
+    <div 
+      className={`study-card ${isClickable ? 'clickable' : ''}`} 
+      onClick={handleClick}
+    >
       <div className="study-card-header">
         <span className="study-card-emoji">{emoji}</span>
         <div className="study-card-title-container">
