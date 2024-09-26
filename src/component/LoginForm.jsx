@@ -1,96 +1,109 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { setUser } from '../store/userSlice.ts';
+import { login } from '../store/loginSlice.ts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import './Input.css';
+import { useNavigate } from 'react-router-dom';
 
-function MemberUpdateForm() {
+function LoginForm() {
     const dispatch = useDispatch();
-    const user = useSelector((state) => state.user);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
 
-    const [nickname, setNickname] = useState('');
-    const [goalTime, setGoalTime] = useState('');
-    const [todayTime, setTodayTime] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [passwordMatchMessage, setPasswordMatchMessage] = useState('');
-    const [showNewPassword, setShowNewPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    function handleLoginTest() {
+        dispatch(login());
+        dispatch(setUser({
+            nickname: '홍길동', 
+            email: 'hong@ureca.com',
+            goalTime: 10000,
+            todayTime: 8000,
+        }));
+        navigate("/");
+    }
 
-    useEffect(() => {
-        if (user) {
-            setNickname(user.nickname);
-            setGoalTime(user.goalTime);
-            setTodayTime(user.todayTime);
-        }
-    }, [user]);
-
-    useEffect(() => {
-        if (confirmPassword) {
-            if (newPassword === confirmPassword) {
-                setPasswordMatchMessage('비밀번호가 일치합니다.');
-            } else {
-                setPasswordMatchMessage('비밀번호가 일치하지 않습니다.');
+    const loginUser = async (email, memberPassword) => {
+        try {
+            const response = await fetch('/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    memberPassword
+                }),
+            });
+            if (!response.ok) {
+                throw new Error('Login failed');
             }
-        } else {
-            setPasswordMatchMessage('');
+            return await response.json();
+        } catch (error) {
+            console.error('Login failed:', error);
+            return null;
         }
-    }, [newPassword, confirmPassword]);
+    };
 
-    const handleSubmit = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        dispatch(
-            setUser({
-                nickname,
-                email: user.email,
-                goalTime,
-                todayTime,
-            })
-        );
-        setNewPassword('');
-        setConfirmPassword('');
-    };
-
-    const handleTogglePassword = (field) => {
-        if (field === 'new') {
-            setShowNewPassword(!showNewPassword);
-        } else if (field === 'confirm') {
-            setShowConfirmPassword(!showConfirmPassword);
+        const loginResponse = await loginUser(email, password);
+        if (loginResponse) {
+            dispatch(login());
+            dispatch(setUser({
+                memberId: loginResponse.memberId,
+                nickname: loginResponse.nickname,
+                email: loginResponse.email,
+                goalTime: loginResponse.goalTime,
+                todayTime: loginResponse.todayTime,
+            }));
+            navigate("/");
+        } else {
+            console.log('Login failed');
+            setPassword(''); // Reset password input
         }
     };
+
+    const handleMouseDown = () => setShowPassword(true);
+    const handleMouseUp = () => setShowPassword(false);
 
     return (
-        <div className='modify-form'>
-            <form onSubmit={handleSubmit}>
-            <div className="input-wrapper">
-                    <label>비밀번호 수정 확인</label><br />
+        <div className='login-form'>
+            <form onSubmit={handleLoginTest}>
+                <div className="input-wrapper">
+                    <label>이메일</label><br />
+                    <input
+                        type='email'
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                </div>
+                <div className="input-wrapper">
+                    <label>비밀번호</label><br />
                     <div className="password-input-wrapper">
                         <input
-                            type={showConfirmPassword ? 'text' : 'password'}
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            type={showPassword ? 'text' : 'password'}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
                         <FontAwesomeIcon 
                             icon={faEye}
-                            onMouseDown={() => handleTogglePassword('confirm')}
-                            onMouseUp={() => handleTogglePassword('confirm')}
-                            onMouseLeave={() => setShowConfirmPassword(false)}
+                            onMouseDown={handleMouseDown}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
                             className="password-toggle"
                         />
                     </div>
-                    <div className="password-match-container">
-                        <div className={`password-match-message ${passwordMatchMessage ? 'visible' : ''} ${newPassword === confirmPassword ? 'match' : 'mismatch'}`}>
-                            {passwordMatchMessage}
-                        </div>
-                    </div>
                 </div>
-                <button className='mybtn skyblue rounded' type='submit'>
-                    수정 완료
+                
+                <button className='mybtn skyblue rounded' type='submit' style={{ marginLeft: '0px' }}>
+                    로그인
                 </button>
             </form>
         </div>
     );
 }
 
-export default MemberUpdateForm;
+export default LoginForm;
