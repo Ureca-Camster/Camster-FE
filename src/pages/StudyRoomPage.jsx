@@ -49,7 +49,7 @@ function StudyRoomPage() {
         if (Array.isArray(data)) {
           setMemberCount(data.length); // 멤버 수 상태 업데이트
           setMembers(data); // 멤버 목록 상태 업데이트
-          const isUserMember = data.some(member => member.memberId === user.id);
+          const isUserMember = data.some(member => member.memberId === user.memberId);
           setIsMember(isUserMember);  // 가입 여부 업데이트
         } else {
           console.error("Invalid data format:", data);
@@ -68,7 +68,7 @@ function StudyRoomPage() {
       .catch((error) => {
         console.error("Failed to fetch posts:", error);
       });
-  }, [studyNo, isLoggedIn, navigate, user.id]);
+  }, [studyNo, isLoggedIn, navigate, user.memberId]);
 
   // 수정 모달 열기/닫기
   const toggleEditModal = () => {
@@ -112,6 +112,63 @@ function StudyRoomPage() {
       });
     }
   };
+
+  //캠스터디 시작 함수
+  const handleCamStudy = () => {
+    if(window.confirm("캠스터디를 시작하시겠습니까?")) {
+      navigate(`/study/${studyNo}/camstudy`);
+    }
+  }
+
+  // 스터디 가입 함수
+const handleJoinStudy = () => {
+  if (window.confirm("스터디에 가입하시겠습니까?")) {
+    const newMember = {
+      memberId: user.memberId,  // 로그인한 유저의 ID
+      studyId: studyNo,         // 현재 스터디 ID
+      nickname: user.nickname   // 닉네임
+    };
+
+    fetch(`http://localhost:8080/studies/${studyNo}/members`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newMember)
+    })
+    .then(response => response.json())
+    .then(data => {
+      setIsMember(true);  // 가입 상태 업데이트
+      setMemberCount(prevCount => prevCount + 1); // 멤버 수 증가
+      setMembers(prevMembers => [...prevMembers, data]);  // 멤버 목록 업데이트
+      alert("스터디에 가입되었습니다.");
+    })
+    .catch(error => {
+      console.error("스터디 가입에 실패했습니다.", error);
+      alert("가입에 실패했습니다.");
+    });
+  }
+};
+
+  // 스터디 탈퇴 함수
+const handleStudyOut = () => {
+  if (window.confirm("정말로 스터디에서 탈퇴하시겠습니까?")) {
+    fetch(`http://localhost:8080/studies/${studyNo}/members/${user.memberId}`, {
+      method: 'DELETE'
+    })
+    .then(() => {
+      setIsMember(false);  // 탈퇴 상태 업데이트
+      setMemberCount(prevCount => prevCount - 1); // 멤버 수 감소
+      setMembers(prevMembers => prevMembers.filter(member => member.memberId !== user.memberId));  // 멤버 목록에서 제거
+      alert("스터디에서 탈퇴하였습니다.");
+      navigate("/")
+    })
+    .catch(error => {
+      console.error("스터디 탈퇴에 실패했습니다.", error);
+      alert("탈퇴에 실패했습니다.");
+    });
+  }
+};
 
   // 게시물 제출 함수
   const handlePostSubmit = () => {
@@ -176,6 +233,14 @@ function StudyRoomPage() {
             <FaUser style={{ marginRight: "8px" }} /> {memberCount}명
           </span>
           <button className="custom-btn" onClick={toggleMemberListModal}>목록 보기</button>
+        </div>
+        <div style={{display:"flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", marginTop: "20px"}}>
+          <button className="custom-btn" onClick={handleCamStudy}>캠스터디 시작하기</button>
+          {isMember ? (
+            <button className="custom-btn" onClick={handleStudyOut}>탈퇴</button>
+          ) : (
+            <button className="custom-btn" onClick={handleJoinStudy}>가입</button>
+          )}
         </div>
       </div>
 
