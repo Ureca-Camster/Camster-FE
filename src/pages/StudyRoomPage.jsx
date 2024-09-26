@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAppSelector } from '../store/hooks.ts'; // Redux의 상태 가져오기
-import { FaEdit } from 'react-icons/fa';  // 설치 필요: npm install react-icons
+import { FaUser, FaEdit } from 'react-icons/fa';  // 설치 필요: npm install react-icons
 
 function StudyRoomPage() {
   const { studyNo } = useParams();  // URL에서 studyNo 파라미터 가져오기
@@ -85,32 +85,37 @@ function StudyRoomPage() {
     setIsMemberListOpen(!isMemberListOpen);
   };
 
-  // 설명 수정 함수
+  // 설명 수정 함수 (수정 확인 메시지 추가)
   const handleDescriptionUpdate = () => {
-    const updatedStudyRoom = {
-      ...studyRoom,
-      description: editedDescription,
-    };
+    if (window.confirm("정말로 수정하시겠습니까?")) {
+      const updatedStudyRoom = {
+        ...studyRoom,
+        description: editedDescription,
+      };
 
-    fetch(`http://localhost:8080/studies/${studyNo}?loggedInMemberId=${user.memberId}`, {
-      method: 'PUT',  // PUT 요청으로 수정
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updatedStudyRoom)
-    })
-    .then(response => response.json())
-    .then(data => {
-      setStudyRoom(data);  // 수정된 스터디룸 데이터를 상태에 저장
-      toggleEditModal();  // 모달 닫기
-    })
-    .catch(error => {
-      console.error("스터디룸 설명 수정에 실패했습니다.", error);
-    });
+      fetch(`http://localhost:8080/studies/${studyNo}?loggedInMemberId=${user.memberId}`, {
+        method: 'PUT',  // PUT 요청으로 수정
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedStudyRoom)
+      })
+      .then(response => response.json())
+      .then(data => {
+        setStudyRoom(data);  // 수정된 스터디룸 데이터를 상태에 저장
+        toggleEditModal();  // 모달 닫기
+        alert("수정이 완료되었습니다.");  // 수정 완료 후 알림
+      })
+      .catch(error => {
+        console.error("스터디룸 설명 수정에 실패했습니다.", error);
+        alert("수정에 실패했습니다.");  // 수정 실패 시 알림
+      });
+    }
   };
 
   // 게시물 제출 함수
   const handlePostSubmit = () => {
+    if (window.confirm("등록 하시겠습니까?")){
     const newPost = {
       title: postTitle,
       content: postContent,
@@ -137,6 +142,7 @@ function StudyRoomPage() {
     setIsModalOpen(false);  // 모달 닫기
     setPostTitle("");  // 제목 초기화
     setPostContent("");  // 내용 초기화
+    }
   };
 
   if (!studyRoom) return <div>Loading...</div>;
@@ -144,11 +150,18 @@ function StudyRoomPage() {
   return (
     <div style={{ display: "flex", gap: "20px", padding: "20px", maxWidth: "1200px", margin: "0 auto", position: "relative" }}>
       {/* 왼쪽: 스터디 제목, 설명, 인원수, 버튼들 */}
-      <div style={{ flex: "4", border: "1px solid #ccc", padding: "20px", borderRadius: "10px" }}>
+      <div style={{ 
+        flex: "4", 
+        border: "1px solid #8BC9FF", 
+        padding: "20px", 
+        borderRadius: "10px", 
+        height: "500px",  // 고정된 높이 설정
+        overflow: "auto"  // 내용이 많아질 경우 스크롤 생성
+      }}>
         <h1>{studyRoom.studyName} 스터디룸</h1>
 
         {/* 설명을 감싸는 추가된 상자 */}
-        <div style={{ position: "relative", padding: "20px", border: "1px solid #ddd", borderRadius: "10px" }}>
+        <div style={{ position: "relative", padding: "20px", border: "1px solid #8BC9FF", borderRadius: "10px" }}>
           <p>{studyRoom.description}</p>
           {/* 연필 아이콘 (로그인한 유저가 스터디 방을 만들었을 때만 보임) */}
           {user.memberId === studyRoom.memberId && (
@@ -159,8 +172,10 @@ function StudyRoomPage() {
           )}
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", marginTop: "20px" }}>
-          <span>인원수: {memberCount}명</span>
-          <button style={{ padding: "5px 10px", cursor: "pointer" }} onClick={toggleMemberListModal}>목록 보기</button>
+          <span style={{ display: "flex", alignItems: "center" }}>
+            <FaUser style={{ marginRight: "8px" }} /> {memberCount}명
+          </span>
+          <button className="custom-btn" onClick={toggleMemberListModal}>목록 보기</button>
         </div>
       </div>
 
@@ -174,7 +189,7 @@ function StudyRoomPage() {
           padding: "30px",
           width: "400px",
           backgroundColor: "#fff",
-          border: "1px solid #ddd",
+          border: "1px solid #8BC9FF",
           borderRadius: "10px",
           zIndex: 1000,
         }}>
@@ -184,25 +199,31 @@ function StudyRoomPage() {
               <li key={member.memberId}>{member.nickname}</li>
             ))}
           </ul>
-          <button onClick={toggleMemberListModal}>닫기</button>
+          <button className="custom-btn" onClick={toggleMemberListModal}>닫기</button>
         </div>
       )}
 
       {/* 오른쪽: 게시판 목록 */}
-      <div style={{ flex: "6", border: "1px solid #ccc", padding: "20px", borderRadius: "10px", position: "relative" }}>
-        <button onClick={toggleModal}>+</button>새 게시물을 작성하세요
-        <button onClick={() => navigate("/")}>뒤로</button>
+      <div style={{ 
+        flex: "6", 
+        border: "1px solid #8BC9FF", 
+        padding: "20px", 
+        borderRadius: "10px", 
+        maxHeight: "500px",  // 고정된 높이 설정
+        overflowY: "auto"  // 스크롤 생성
+      }}>
+        <button className="custom-btn" onClick={toggleModal}>+</button>  새 게시물을 작성하세요
 
         {/* 게시물 목록을 표시하는 부분 */}
         <div style={{ marginTop: "20px" }}>
           {posts.length > 0 ? (
             <ul>
               {posts.map((post) => (
-                <li key={post.boardId} style={{ marginBottom: "10px", borderBottom: "1px solid #ddd", paddingBottom: "10px" }}>
+                <li key={post.boardId} style={{ marginBottom: "10px", borderBottom: "1px solid #8BC9FF", paddingBottom: "10px" }}>
                   <Link to={`/post/${post.boardId}`}>
                     <h3>{post.title}</h3>
                   </Link>
-                  <p>{post.content}</p>
+                  <h5>{post.content}</h5>
                   <p>작성자: {post.nickname || "알 수 없음"}</p>
                   <p>작성일: {new Date(post.createDate).toLocaleString()}</p>
                 </li>
@@ -224,7 +245,7 @@ function StudyRoomPage() {
           padding: "30px",
           width: "500px",
           backgroundColor: "#fff",
-          border: "1px solid #ddd",
+          border: "1px solid #8BC9FF",
           borderRadius: "10px",
           zIndex: 1000,
         }}>
@@ -234,17 +255,17 @@ function StudyRoomPage() {
             value={postTitle}
             onChange={(e) => setPostTitle(e.target.value)}
             placeholder="제목을 입력하세요"
-            style={{ width: "100%", padding: "10px", marginBottom: "10px", fontSize: "16px" }}
+            style={{ width: "100%", padding: "10px", marginBottom: "10px", fontSize: "16px", border: "1px solid #8BC9FF", borderRadius: "5px" }}
           />
           <textarea
             value={postContent}
             onChange={(e) => setPostContent(e.target.value)}
             placeholder="게시물 내용을 입력하세요..."
-            style={{ width: "100%", height: "150px", padding: "10px", fontSize: "14px", marginBottom: "10px" }}
+            style={{ width: "100%", height: "150px", padding: "10px", fontSize: "14px", marginBottom: "10px", border: "1px solid #8BC9FF", borderRadius: "5px" }}
           />
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <button onClick={handlePostSubmit} style={{ padding: "10px 20px", cursor: "pointer" }}>등록</button>
-            <button onClick={toggleModal} style={{ padding: "10px 20px", cursor: "pointer" }}>취소</button>
+            <button className="custom-btn" onClick={handlePostSubmit}>등록</button>
+            <button className="custom-btn" onClick={toggleModal}>취소</button>
           </div>
         </div>
       )}
@@ -259,7 +280,7 @@ function StudyRoomPage() {
           padding: "30px",
           width: "500px",
           backgroundColor: "#fff",
-          border: "1px solid #ddd",
+          border: "1px solid #8BC9FF",
           borderRadius: "10px",
           zIndex: 1000,
         }}>
@@ -268,14 +289,55 @@ function StudyRoomPage() {
             value={editedDescription}
             onChange={(e) => setEditedDescription(e.target.value)}
             placeholder="스터디 설명을 수정하세요..."
-            style={{ width: "100%", height: "150px", padding: "10px", fontSize: "14px", marginBottom: "10px" }}
+            style={{ width: "100%", height: "150px", padding: "10px", fontSize: "14px", marginBottom: "10px", border: "1px solid #8BC9FF", borderRadius: "5px" }}
           />
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <button onClick={handleDescriptionUpdate} style={{ padding: "10px 20px", cursor: "pointer" }}>저장</button>
-            <button onClick={toggleEditModal} style={{ padding: "10px 20px", cursor: "pointer" }}>취소</button>
+            <button className="custom-btn" onClick={handleDescriptionUpdate}>저장</button>
+            <button className="custom-btn" onClick={toggleEditModal}>취소</button>
           </div>
         </div>
       )}
+
+      {/* 스타일 */}
+      <style>
+      {`
+          ul {
+            list-style-type: none;  /* 리스트 스타일을 없애 점 제거 */
+            padding: 0;  /* 패딩도 제거하여 깔끔하게 */
+          }
+
+          /* 제목 링크 부분 숨기기 */
+          a {
+            text-decoration: none;  /* 링크의 밑줄 제거 */
+            color: inherit;  /* 부모 요소의 색상 상속 */
+          }
+
+          .custom-btn {
+            padding: 5px 10px;
+            border: 1px solid #8BC9FF;
+            background-color: white;
+            color: black;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+          }
+          .custom-btn:hover {
+            background-color: #8BC9FF;
+            color: white;
+          }
+          ::-webkit-scrollbar {
+            width: 10px;
+            border-radius: 10px;
+          }
+          ::-webkit-scrollbar-thumb {
+            background-color: #8BC9FF;
+            border-radius: 10px;
+          }
+          ::-webkit-scrollbar-track {
+            background-color: #f5f5f5;
+          }
+        `}
+      </style>
     </div>
   );
 }
