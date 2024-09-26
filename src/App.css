@@ -14,19 +14,3 @@
 .App {
     text-align: center;
 }
-
-/* "로그인" 후 이용 */
-.login-text {
-    font-size: 30px;
-    text-align: center;
-  }
-  
-  .login-link {
-    color: #5EAEFF;
-    cursor: pointer;
-    text-decoration: underline;
-  }
-  
-  .login-link:hover {
-    color: #268ef6;
-  }
