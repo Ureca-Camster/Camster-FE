@@ -8,7 +8,7 @@
     background-color: #8BC9FF;
     padding: 0;
     margin: 0;
-    height: 75px;
+    height: 80px;
 }
 
 /* Logo Image */
@@ -40,7 +40,7 @@
 }
 .navbar-span {
     margin-right: 10px;
-    font-size: 20px;
+    font-size: 25px;
     text-decoration: none;
     padding-top: 5px;
     font-weight: bold;
@@ -64,12 +64,12 @@
 .mybtn {
     position: relative;
     border: 0;
-    padding: 10px 20px 5px 20px; /* top right bottom left */
+    padding: 11px 18px 5px 18px; /* top right bottom left */
     display: inline-block;
     text-align: center;
     color: white;
     text-decoration: none;
-    font-size: 20px;
+    font-size: 25px;
     font-weight: bold;
 }
 .mybtn:active {

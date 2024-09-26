@@ -1,13 +1,20 @@
 .monthly-tracker {
   max-width: 400px;
   margin: 0 auto;
+  background-color: white;
+}
+
+.calendar-div {
+  background-color: #FDFDFD;
+  padding: 10px 15px 15px 15px;
+  border-radius: 10px;
 }
 
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 10px 0px;
+  margin-bottom: 10px;
 }
 
 .calendar-header h2 {
@@ -15,7 +22,7 @@
   flex-grow: 1;
   text-align: center;
   font-size: 24px;
-  font-weight: normal;
+  font-weight: bold;
   line-height: 1;
 }
 
@@ -41,20 +48,20 @@
 .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
+  gap: 0px;
   background-color: white;
-  border: 2px solid #e0e0e0;
+  /* border: 2px solid #e0e0e0; */
   border-radius: 10px;
   overflow: hidden;
 }
 
 .day-header {
-  background-color: #fff;
+  background-color: #FDFDFD;
   text-align: center;
   padding: 10px 0;
   font-weight: bold;
   color: #333;
-  border-bottom: 2px solid #e0e0e0;
+  /* border-bottom: 2px solid #e0e0e0; */
 }
 
 .day {
@@ -80,19 +87,22 @@
 }
 
 .selected-date-info {
-  margin-top: 20px;
+  margin-top: 15px;
   padding: 15px;
-  background-color: #f8f9fa;
+  background-color: #FDFDFD;
   border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
+  display: flex;
+  justify-content: space-between;
 }
 
-.selected-date-info p {
+.selected-date-info span {
   margin: 5px 0;
   font-size: 16px;
+  font-family: 'Krona One', sans-serif;
 }
 
-.selected-date-info p:last-child {
+.selected-date-info span:last-child {
   color: #007bff;
   font-weight: bold;
 }

@@ -14,20 +14,21 @@ function MyPage() {
     <>
       {isLoggedIn ? (
         <Container>
-            <Row>
-                <Col><MonthlyTracker /></Col>
-                <Col><MemberUpdateForm /></Col>
-            </Row>
+          <Row>
+            <Col><MonthlyTracker /></Col>
+            <Col><MemberUpdateForm /></Col>
+          </Row>
         </Container>
-    ) : (
-        <div>
-            <p>
-                <span
-                    onClick={() => navigate('/login')}
-                    className='login-link'
-                >로그인</span>{' '}
-                후 이용 가능합니다.
-            </p>
+      ) : (
+        <div className="login-div">
+          <p className='login-text'>
+            마이페이지는{' '}
+            <span
+              onClick={() => navigate('/login')}
+              className='login-link'
+            >로그인</span>{' '}
+            후 이용 가능합니다.
+          </p>
         </div>
       )}
     </>

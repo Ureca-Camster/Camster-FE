@@ -126,6 +126,7 @@ const MonthlyTracker = ({ memberId }) => {
 
   return (
     <div className="monthly-tracker">
+      <div className='calendar-div'>
       <div className="calendar-header">
         <button className="nav-button" onClick={handlePrevMonth}>◀️</button>
         <h2>{year} {monthNames[month - 1]}</h2>
@@ -138,10 +139,11 @@ const MonthlyTracker = ({ memberId }) => {
         ))}
         {renderCalendar()}
       </div>
+      </div>
       {selectedDate && (
         <div className="selected-date-info">
-          <p>Date: {selectedDate}</p>
-          <p>Study Time: {
+          <span>{selectedDate}</span>
+          <span>{
             (() => {
               const record = recordList.find(r => r.date === selectedDate);
               const seconds = record ? record.time : 0;
@@ -150,15 +152,15 @@ const MonthlyTracker = ({ memberId }) => {
               const remainingSeconds = seconds % 60;
               return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
             })()
-          }</p>
-          <p>Goal Percentage: {
+          }</span>
+          <span>{
             (() => {
               const record = recordList.find(r => r.date === selectedDate);
               return record && record.time > 0
                 ? Math.min(100, Math.round((record.time / record.goalTime) * 100))
                 : 0;
             })()
-          }%</p>
+          }%</span>
         </div>
       )}
     </div>
