@@ -3,11 +3,17 @@ import { useDispatch } from 'react-redux';
 import { setUser } from '../store/userSlice.ts';
 import { login } from '../store/loginSlice.ts';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye } from '@fortawesome/free-solid-svg-icons';
+import './Input.css';
+import { useNavigate } from 'react-router-dom';
 
-function MemberUpdateForm() {
+function LoginForm() {
     const dispatch = useDispatch();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
 
     const loginUser = async (email, password) => {
         try {
@@ -32,6 +38,17 @@ function MemberUpdateForm() {
         }
     };
 
+    function handleLoginButton() {
+        dispatch(login());
+        dispatch(setUser({
+            nickname: '홍길동', 
+            email: 'hong@ureca.com',
+            goalTime: 10000,
+            todayTime: 8000,
+        }));
+        navigate("/");
+    }
+    
     const handleLogin = async (e) => {
         e.preventDefault();
         const loginSuccess = await loginUser(email, password);
@@ -39,7 +56,6 @@ function MemberUpdateForm() {
             dispatch(login());
             const userInfo = await fetchUserInfo();
             if (userInfo) {
-                // Update Redux store with user info
                 dispatch(setUser({
                     nickname: userInfo.nickname,
                     email: userInfo.email,
@@ -47,16 +63,20 @@ function MemberUpdateForm() {
                     todayTime: userInfo.todayTime,
                 }));
             }
+            navigate("/");
         } else {
-            // Handle login failure (e.g., show an error message)
             console.log('Login failed');
+            setPassword(''); // Reset password input
         }
     };
 
+    const handleMouseDown = () => setShowPassword(true);
+    const handleMouseUp = () => setShowPassword(false);
+
     return (
-        <div className='modify-form'>
-            <form onSubmit={handleLogin}>
-                <div style={{ marginBottom: '10px' }}>
+        <div className='login-form'>
+            <form onSubmit={handleLoginButton}>
+                <div className="input-wrapper">
                     <label>이메일</label><br />
                     <input
                         type='email'
@@ -64,13 +84,22 @@ function MemberUpdateForm() {
                         onChange={(e) => setEmail(e.target.value)}
                     />
                 </div>
-                <div style={{ marginBottom: '10px' }}>
+                <div className="input-wrapper">
                     <label>비밀번호</label><br />
-                    <input
-                        type='password'
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
+                    <div className="password-input-wrapper">
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <FontAwesomeIcon 
+                            icon={faEye}
+                            onMouseDown={handleMouseDown}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
+                            className="password-toggle"
+                        />
+                    </div>
                 </div>
                 
                 <button className='mybtn skyblue rounded' type='submit' style={{ marginLeft: '0px' }}>
@@ -81,4 +110,4 @@ function MemberUpdateForm() {
     );
 }
 
-export default MemberUpdateForm;
+export default LoginForm;
