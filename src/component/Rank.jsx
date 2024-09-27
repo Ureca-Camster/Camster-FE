@@ -31,11 +31,11 @@ const Rank = () => {
             //   fetchRanks();
             dispatch(setRanks({ ranks: [
 
-                {"nickname": "Tom", "time":10000},
+                {"nickname": "강아지", "time":10000},
         
-                {"nickname": "And", "time":8000},
+                {"nickname": "고양이", "time":8000},
         
-                {"nickname": "Jerry", "time":7503}
+                {"nickname": "토끼토끼", "time":7503}
         
             ], lastUpdated: today }));
         }
@@ -43,8 +43,8 @@ const Rank = () => {
 
     return (
         <div>
-        <h3 style={{margin: "0 0 0 30px"}}>어제의 TOP3👑</h3>
-        <ListGroup className="mx-auto" style={{ maxWidth: '80%' }}>
+        <h3 style={{fontWeight: "bold", marginBottom: "0"}}>어제의 TOP3👑</h3>
+        <ListGroup className="mx-auto">
             {ranks.slice(0, 3).map((rank, index) => (
                 <ListGroup.Item 
                     key={index} 
@@ -55,9 +55,9 @@ const Rank = () => {
                         width: '300px'
                     }}
                 >
-                    <span className="fw-bold" style={{ width: '30px' }}>{index + 1}</span>
-                    <span className="flex-grow-1">{rank.nickname}</span>
-                    <span style={{ color: '#2299FF', fontWeight: '500' }}>{formatTime(rank.time)}</span>
+                    <span className="fw-bold" style={{ width: '30px', fontFamily:'Krona One' }}>{index + 1}</span>
+                    <span className="flex-grow-1" style={{ paddingTop: '1px' , marginTop: '1px'}}>{rank.nickname}</span>
+                    <span style={{ color: '#2299FF', fontWeight: '500', fontFamily:'Krona One' }}>{formatTime(rank.time)}</span>
                 </ListGroup.Item>
             ))}
         </ListGroup>
