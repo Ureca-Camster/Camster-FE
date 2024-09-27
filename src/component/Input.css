@@ -1,26 +1,48 @@
-.login-form .input-wrapper {
+/* "로그인" 후 이용 */
+.login-text {
+    font-size: 30px;
+    text-align: center;
+}
+
+.login-link {
+    color: #5EAEFF;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.login-link:hover {
+    color: #268ef6;
+}
+
+.login-form .input-wrapper,
+.modify-form .input-wrapper {
     margin-bottom: 10px;
+    width: 100%;
 }
 
-.login-form input {
-    width: auto; /* Reset width to default */
+.login-form input,
+.modify-form input {
+    width: 100%;
+    box-sizing: border-box;
 }
 
+/* 패스워드 스타일, 보이기-숨기기 */
 .password-input-wrapper {
     position: relative;
-    display: inline-block; /* Make wrapper fit content */
+    display: block;
+    width: 100%;
+    margin: 0;
 }
 
 .password-toggle {
     position: absolute;
     top: 50%;
-    right: 8px; /* Moved inside the box */
+    right: 8px;
     transform: translateY(-50%);
     cursor: pointer;
-    z-index: 1; /* Ensure the icon is clickable */
+    z-index: 1;
 }
 
-/* Increase the clickable area of the icon */
 .password-toggle::before {
     content: '';
     position: absolute;
@@ -30,22 +52,58 @@
     left: -10px;
 }
 
+/* 비밀번호 - 비밀번호 확인 비교 메시지 */
 .password-match-message {
     width: 100%;
     box-sizing: border-box;
-    margin-top: 5px;
-    padding: 5px;
+    padding: 2px 0 0 0;
+    /* margin-top: 5px; */
+    margin-bottom: 0;
     border-radius: 4px;
-    font-size: 0.9em;
+    font-size: 13px;
     text-align: center;
+    min-height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-match-message.nonexist {
+    visibility: hidden;
 }
 
 .password-match-message.match {
-    background-color: #4CAF50;
-    color: white;
+    background-color: #F0FFF3;
+    color: #009721;
 }
 
 .password-match-message.mismatch {
-    background-color: #F44336;
-    color: white;
+    background-color: #FFE3E3;
+    color: #C80000;
+}
+
+/* 전체 스타일 */
+.input-wrapper {
+    margin: 10px 0;
+}
+
+.login-form,
+.modify-form {
+    width: 100%;
+    max-width: 300px;
+}
+
+.login-form .mybtn.skyblue,
+.modify-form .mybtn.skyblue {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 수정 폼 스타일 */
+.modify-form {
+    background-color: #FDFDFD;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    border-radius: 10px;
 }

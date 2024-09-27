@@ -1,8 +1,9 @@
-// MemberUpdateForm.jsx
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../store/userSlice.ts';
-import { login } from '../store/loginSlice.ts';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye } from '@fortawesome/free-solid-svg-icons';
+import './Input.css';
 
 function MemberUpdateForm() {
     const dispatch = useDispatch();
@@ -14,8 +15,9 @@ function MemberUpdateForm() {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordMatchMessage, setPasswordMatchMessage] = useState('');
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    // Set initial values from user state
     useEffect(() => {
         if (user) {
             setNickname(user.nickname);
@@ -24,7 +26,6 @@ function MemberUpdateForm() {
         }
     }, [user]);
 
-    // Handle real-time password matching
     useEffect(() => {
         if (confirmPassword) {
             if (newPassword === confirmPassword) {
@@ -39,26 +40,30 @@ function MemberUpdateForm() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Update the redux value first
         dispatch(
             setUser({
                 nickname,
-                email: user.email, // Keep the original email
+                email: user.email,
                 goalTime,
                 todayTime,
             })
         );
-        // Fetch request for the member info including password
-
-        // Reset the password fields after processing if needed
         setNewPassword('');
         setConfirmPassword('');
+    };
+
+    const handleTogglePassword = (field) => {
+        if (field === 'new') {
+            setShowNewPassword(!showNewPassword);
+        } else if (field === 'confirm') {
+            setShowConfirmPassword(!showConfirmPassword);
+        }
     };
 
     return (
         <div className='modify-form'>
             <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: '10px' }}>
+                <div className="input-wrapper">
                     <label>닉네임</label><br />
                     <input
                         type='text'
@@ -66,11 +71,11 @@ function MemberUpdateForm() {
                         onChange={(e) => setNickname(e.target.value)}
                     />
                 </div>
-                <div style={{ marginBottom: '10px' }}>
+                <div className="input-wrapper">
                     <label>이메일</label><br />
                     <input type='email' value={user.email} readOnly />
                 </div>
-                <div style={{ marginBottom: '10px' }}>
+                <div className="input-wrapper">
                     <label>목표 학습 시간</label><br />
                     <input
                         type='number'
@@ -78,7 +83,7 @@ function MemberUpdateForm() {
                         onChange={(e) => setGoalTime(e.target.value)}
                     />
                 </div>
-                <div style={{ marginBottom: '10px' }}>
+                <div className="input-wrapper">
                     <label>오늘 학습 시간</label><br />
                     <input
                         type='number'
@@ -86,37 +91,46 @@ function MemberUpdateForm() {
                         onChange={(e) => setTodayTime(e.target.value)}
                     />
                 </div>
-                <div style={{ marginBottom: '10px' }}>
+                <div className="input-wrapper">
                     <label>비밀번호 수정</label><br />
-                    <input
-                        type='password'
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                    />
+                    <div className="password-input-wrapper">
+                        <input
+                            type={showNewPassword ? 'text' : 'password'}
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                        <FontAwesomeIcon 
+                            icon={faEye}
+                            onMouseDown={() => handleTogglePassword('new')}
+                            onMouseUp={() => handleTogglePassword('new')}
+                            onMouseLeave={() => setShowNewPassword(false)}
+                            className="password-toggle"
+                        />
+                    </div>
                 </div>
-                <div style={{ marginBottom: '10px' }}>
+                <div className="input-wrapper" style={{marginBottom: '2px'}}>
                     <label>비밀번호 수정 확인</label><br />
-                    <input
-                        type='password'
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                    {passwordMatchMessage && (
-                        <p
-                            style={{
-                                backgroundColor:
-                                    newPassword === confirmPassword ? 'green' : 'red',
-                                color: 'white',
-                                padding: '5px',
-                                borderRadius: '4px',
-                                marginTop: '5px',
-                            }}
-                        >
-                            {passwordMatchMessage}
-                        </p>
-                    )}
+                    <div className="password-input-wrapper">
+                        <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                        <FontAwesomeIcon 
+                            icon={faEye}
+                            onMouseDown={() => handleTogglePassword('confirm')}
+                            onMouseUp={() => handleTogglePassword('confirm')}
+                            onMouseLeave={() => setShowConfirmPassword(false)}
+                            className="password-toggle"
+                        />
+                    </div>
+                    <div className={
+                        `password-match-message ${newPassword === confirmPassword ? 'match' : 'mismatch'}
+                        ${passwordMatchMessage === '' ? 'nonexist' : 'exist'}`}>
+                        {passwordMatchMessage}
+                    </div>
                 </div>
-                <button className='mybtn skyblue rounded' type='submit' style={{ marginLeft: '0px' }}>
+                <button className='mybtn skyblue rounded' type='submit'>
                     수정 완료
                 </button>
             </form>

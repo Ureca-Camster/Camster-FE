@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../store/userSlice.ts';
 import { login } from '../store/loginSlice.ts';
-import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import './Input.css';
@@ -15,30 +14,7 @@ function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
-    const loginUser = async (email, password) => {
-        try {
-            const response = await axios.post('/members/login', {
-                email,
-                memberPassword: password
-            });
-            return response.status === 200;
-        } catch (error) {
-            console.error('Login failed:', error);
-            return false;
-        }
-    };
-
-    const fetchUserInfo = async () => {
-        try {
-            const response = await axios.get('/members');
-            return response.data;
-        } catch (error) {
-            console.error('Failed to fetch user info:', error);
-            return null;
-        }
-    };
-
-    function handleLoginButton() {
+    function handleLoginTest() {
         dispatch(login());
         dispatch(setUser({
             nickname: '홍길동', 
@@ -48,21 +24,41 @@ function LoginForm() {
         }));
         navigate("/");
     }
-    
+
+    const loginUser = async (email, memberPassword) => {
+        try {
+            const response = await fetch('/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    memberPassword
+                }),
+            });
+            if (!response.ok) {
+                throw new Error('Login failed');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Login failed:', error);
+            return null;
+        }
+    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
-        const loginSuccess = await loginUser(email, password);
-        if (loginSuccess) {
+        const loginResponse = await loginUser(email, password);
+        if (loginResponse) {
             dispatch(login());
-            const userInfo = await fetchUserInfo();
-            if (userInfo) {
-                dispatch(setUser({
-                    nickname: userInfo.nickname,
-                    email: userInfo.email,
-                    goalTime: userInfo.goalTime,
-                    todayTime: userInfo.todayTime,
-                }));
-            }
+            dispatch(setUser({
+                memberId: loginResponse.memberId,
+                nickname: loginResponse.nickname,
+                email: loginResponse.email,
+                goalTime: loginResponse.goalTime,
+                todayTime: loginResponse.todayTime,
+            }));
             navigate("/");
         } else {
             console.log('Login failed');
@@ -75,7 +71,7 @@ function LoginForm() {
 
     return (
         <div className='login-form'>
-            <form onSubmit={handleLoginButton}>
+            <form onSubmit={handleLoginTest}>
                 <div className="input-wrapper">
                     <label>이메일</label><br />
                     <input

@@ -1,18 +1,19 @@
-// MainPage.jsx
-import React from 'react';
-import Rank from '../component/Rank';
-import { Col, Container, Row } from 'react-bootstrap';
-import TodayProgress from '../component/TodayProgress';
-import StudyList from '../component/StudyList';
+import React, { useState } from 'react';
+import { Button, Col, Container, Row } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import Rank from '../component/Rank';
+import TodayProgress from '../component/TodayProgress';
+import StudyList from '../component/StudyList';
+import StudyJoinModal from '../component/StudyJoinModal';
+import './MainPage.css'
 
-
-function MainPage(props) {
+function MainPage() {
     const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
     const navigate = useNavigate();
-
-    const myStudyGroups = [
+    const [showModal, setShowModal] = useState(false);
+    const [selectedStudy, setSelectedStudy] = useState(null);
+    const [myStudyGroups, setMyStudyGroups] = useState([
         {
           studyId: 100,
           studyName: "Java 알고리즘 스터디",
@@ -31,8 +32,8 @@ function MainPage(props) {
           description: "뭐 어쩌구 저쩌구 소개",
           emoji: "🔥"
         }
-    ];
-    const allStudyGroups = [
+    ]);
+    const [allStudyGroups, setAllStudyGroups] = useState([
         {
             "studyId": 10,
             "studyName": "C++ 알고리즘 스터디",
@@ -61,7 +62,49 @@ function MainPage(props) {
             "emoji": "💪",
             "isPublic": true
         }
-    ];
+    ]);
+
+    const handleStudyClick = (studyId, isPublic) => {
+        if (!isLoggedIn) {
+            alert('로그인 후 이용 가능합니다.');
+            return;
+        }
+
+        const study = myStudyGroups.find(s => s.studyId === studyId);
+        if (study) {
+            navigate(`/study/${studyId}`);
+        } else {
+            setSelectedStudy(allStudyGroups.find(s => s.studyId === studyId));
+            setShowModal(true);
+        }
+    };
+
+    const handleJoinStudy = async (password) => {
+        try {
+            const response = await fetch(`/studies/${selectedStudy.studyId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ studyPassword: password }),
+            });
+
+            if (response.ok) {
+                // 스터디 가입 성공
+                setMyStudyGroups([...myStudyGroups, selectedStudy]);
+                navigate(`/study/${selectedStudy.studyId}`);
+            } else {
+                // 스터디 가입 실패
+                alert('스터디 가입에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Error joining study:', error);
+            alert('스터디 가입 중 오류가 발생했습니다.');
+        }
+
+        setShowModal(false);
+        setSelectedStudy(null);
+    };
 
     return (
         <Container>
@@ -75,9 +118,20 @@ function MainPage(props) {
             </Row>
             <Row>
                 <div className="app-container mb-5">
-                    <h1 className="app-title">내 스터디 목록👀</h1>
+                    <div className="title-button-container">
+                        <h1 className="app-title">내 스터디 목록👀</h1>
+                        {isLoggedIn && (
+                            <Button className="create-study-button" onClick={() => {/* 스터디 개설 모달 */}}>
+                                스터디 개설하기
+                            </Button>
+                        )}
+                    </div>
                     { isLoggedIn ? (
-                        <StudyList studies={myStudyGroups} />
+                        <StudyList 
+                            studies={myStudyGroups} 
+                            onStudyClick={handleStudyClick} 
+                            isClickable={true}
+                        />
                     ) : (
                         <div className="study-list login-div">
                             <p className='login-text'>
@@ -94,9 +148,19 @@ function MainPage(props) {
             <Row>
                 <div className="app-container">
                     <h1 className="app-title">스터디 둘러보기🔎</h1>
-                    <StudyList studies={allStudyGroups} />
+                    <StudyList 
+                        studies={allStudyGroups} 
+                        onStudyClick={handleStudyClick} 
+                        isClickable={isLoggedIn}
+                    />
                 </div>
             </Row>
+            <StudyJoinModal 
+                show={showModal}
+                onHide={() => setShowModal(false)}
+                onJoin={handleJoinStudy}
+                isPublic={selectedStudy?.isPublic}
+            />
         </Container>
     );
 }

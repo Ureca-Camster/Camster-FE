@@ -20,8 +20,8 @@ function MyPage() {
                     </Row>
                 </Container>
             ) : (
-                <div>
-                    <p>
+                <div className='login-div'>
+                    <p className='login-text'>
                         <span
                             onClick={() => navigate('/login')}
                             className='login-link'
