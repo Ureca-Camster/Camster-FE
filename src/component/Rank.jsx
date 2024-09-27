@@ -57,7 +57,7 @@ const Rank = () => {
                 >
                     <span className="fw-bold" style={{ width: '30px', fontFamily:'Krona One' }}>{index + 1}</span>
                     <span className="flex-grow-1" style={{ paddingTop: '1px' , marginTop: '1px'}}>{rank.nickname}</span>
-                    <span style={{ color: '#2299FF', fontFamily:'Paperlogy-7Bold', letterSpacing:'3px'}}>{formatTime(rank.time)}</span>
+                    <span style={{ color: '#2299FF', fontFamily:'Paperlogy-8ExtraBold', letterSpacing:'3px'}}>{formatTime(rank.time)}</span>
                 </ListGroup.Item>
             ))}
         </ListGroup>

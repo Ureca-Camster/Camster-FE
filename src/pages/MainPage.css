@@ -11,6 +11,7 @@
 
 .create-study-button {
     font-size: 15px;
+    font-weight: bold;
     background-color: #2299FF;
     border-color: #2299FF;
     border-radius: 8px;

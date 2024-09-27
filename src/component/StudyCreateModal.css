@@ -8,13 +8,16 @@
 .study-create-modal .modal-header {
     border-bottom: none;
     padding-top: 5px;
-    justify-content: center; /* 추가: 헤더 내용을 가운데 정렬 */
+    justify-content: center;
+    /* 추가: 헤더 내용을 가운데 정렬 */
 }
 
 .study-create-modal .modal-title {
     font-weight: bold;
-    width: 100%; /* 추가: 전체 너비를 사용 */
-    text-align: center; /* 추가: 텍스트를 가운데 정렬 */
+    width: 100%;
+    /* 추가: 전체 너비를 사용 */
+    text-align: center;
+    /* 추가: 텍스트를 가운데 정렬 */
 }
 
 .study-create-modal .modal-body {
@@ -55,4 +58,35 @@
 
 .form-label {
     margin-bottom: 3px;
+}
+
+.emoji-input-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .emoji-input-container .form-control {
+    flex-grow: 1;
+    margin-right: 10px;
+  }
+  
+  .emoji-picker-container {
+    position: relative;
+    z-index: 1000;
+  }
+  
+  .emoji-picker-react {
+    position: absolute;
+    top: 100%;
+    left: 0;
+  }
+
+/* Modal 스타일 수정 */
+.modal-body {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.study-create-modal .modal-content {
+    overflow: visible;
 }
