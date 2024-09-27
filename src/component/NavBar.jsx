@@ -12,14 +12,14 @@ function NavBar(props) {
     const user = useSelector((state) => state.user);
     const navigate = useNavigate();
     function handleLoginButton() {
-        // navigate("/login");
-        dispatch(login());
-        dispatch(setUser({
-            nickname: '홍길동', 
-            email: 'hong@ureca.com',
-            goalTime: 10000,
-            todayTime: 8000,
-        }));
+        navigate("/login");
+        // dispatch(login());
+        // dispatch(setUser({
+        //     nickname: '홍길동', 
+        //     email: 'hong@ureca.com',
+        //     goalTime: 10000,
+        //     todayTime: 8000,
+        // }));
     }
     function handleLogoutButton() {
         dispatch(logout());
@@ -39,6 +39,7 @@ function NavBar(props) {
             <div className="navbar-links">
                 {isLoggedIn ? (
                     <>
+                    {/*  */}
                         <span onClick={()=>{navigate("/mypage")}} className="navbar-span navbar-username">{user.nickname}</span>
                         <span className="navbar-span">님</span>
                         <button onClick={handleLogoutButton} className="mybtn yellow rounded">로그아웃</button>
