@@ -6,12 +6,14 @@ import Rank from '../component/Rank';
 import TodayProgress from '../component/TodayProgress';
 import StudyList from '../component/StudyList';
 import StudyJoinModal from '../component/StudyJoinModal';
+import StudyCreateModal from '../component/StudyCreateModal';
 import './MainPage.css'
 
 function MainPage() {
     const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
     const navigate = useNavigate();
-    const [showModal, setShowModal] = useState(false);
+    const [showJoinModal, setShowJoinModal] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedStudy, setSelectedStudy] = useState(null);
     const [myStudyGroups, setMyStudyGroups] = useState([
         {
@@ -75,7 +77,7 @@ function MainPage() {
             navigate(`/study/${studyId}`);
         } else {
             setSelectedStudy(allStudyGroups.find(s => s.studyId === studyId));
-            setShowModal(true);
+            setShowJoinModal(true);
         }
     };
 
@@ -102,13 +104,31 @@ function MainPage() {
             alert('스터디 가입 중 오류가 발생했습니다.');
         }
 
-        setShowModal(false);
+        setShowJoinModal(false);
         setSelectedStudy(null);
+    };
+
+    const handleCreateStudy = async (studyData) => {
+        try {
+            // Here you would typically make an API call to create the study
+            // For now, let's just add it to the myStudyGroups state
+            const newStudy = {
+                studyId: Date.now(), // Use a proper ID generation in production
+                ...studyData
+            };
+            setMyStudyGroups([...myStudyGroups, newStudy]);
+            setShowCreateModal(false);
+            // Optionally navigate to the new study page
+            // navigate(`/study/${newStudy.studyId}`);
+        } catch (error) {
+            console.error('Error creating study:', error);
+            alert('스터디 생성 중 오류가 발생했습니다.');
+        }
     };
 
     return (
         <Container>
-            <Row>
+            <Row className='mb-3'>
                 <Col>
                     <TodayProgress />
                 </Col>
@@ -121,7 +141,7 @@ function MainPage() {
                     <div className="title-button-container">
                         <h1 className="app-title">내 스터디 목록👀</h1>
                         {isLoggedIn && (
-                            <Button className="create-study-button" onClick={() => {/* 스터디 개설 모달 */}}>
+                            <Button className="create-study-button" onClick={() => setShowCreateModal(true)}>
                                 스터디 개설하기
                             </Button>
                         )}
@@ -156,10 +176,15 @@ function MainPage() {
                 </div>
             </Row>
             <StudyJoinModal 
-                show={showModal}
-                onHide={() => setShowModal(false)}
+                show={showJoinModal}
+                onHide={() => setShowJoinModal(false)}
                 onJoin={handleJoinStudy}
                 isPublic={selectedStudy?.isPublic}
+            />
+            <StudyCreateModal
+                show={showCreateModal}
+                onHide={() => setShowCreateModal(false)}
+                onSubmit={handleCreateStudy}
             />
         </Container>
     );
