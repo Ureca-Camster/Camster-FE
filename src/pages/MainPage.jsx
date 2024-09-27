@@ -115,16 +115,34 @@ function MainPage() {
 
     const handleCreateStudy = async (studyData) => {
         try {
-            // Here you would typically make an API call to create the study
-            // For now, let's just add it to the myStudyGroups state
-            const newStudy = {
-                studyId: Date.now(), // Use a proper ID generation in production
-                ...studyData
-            };
-            dispatch(addMyStudyGroup(newStudy));
-            setShowCreateModal(false);
-            // Optionally navigate to the new study page
-            // navigate(`/study/${newStudy.studyId}`);
+            const response = await fetch('/studies', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    studyName: studyData.studyName,
+                    description: studyData.description,
+                    emoji: studyData.emoji,
+                    isPublic: studyData.isPublic,
+                    studyPassword: studyData.studyPassword
+                }),
+            });
+
+            if (response.ok) {
+                const { studyId } = await response.json();
+                // Explicitly convert studyId to string
+                const newStudy = {
+                    ...studyData,
+                    studyId: String(studyId)
+                };
+                dispatch(addMyStudyGroup(newStudy));
+                setShowCreateModal(false);
+                // Optionally navigate to the new study page
+                // navigate(`/study/${newStudy.studyId}`);
+            } else {
+                throw new Error('Failed to create study');
+            }
         } catch (error) {
             console.error('Error creating study:', error);
             alert('스터디 생성 중 오류가 발생했습니다.');
