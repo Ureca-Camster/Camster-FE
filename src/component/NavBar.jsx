@@ -13,33 +13,15 @@ function NavBar(props) {
     const navigate = useNavigate();
 
     function handleLoginButton() {
-        fetch('http://localhost:8080/members/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: 'hong@ureca.com',
-                password: 'password123'
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Login data:', data); // 로그로 확인
-            dispatch(login());
-            dispatch(setUser({
-                memberId: data.memberId,  // Redux에 memberId 저장
-                nickname: data.nickname,
-                email: data.email,
-                goalTime: data.goalTime,
-                todayTime: data.todayTime,
-            }));
-        })
-        .catch(error => {
-            console.error("Login failed:", error);
-        });
+        navigate("/login");
+        // dispatch(login());
+        // dispatch(setUser({
+        //     nickname: '홍길동', 
+        //     email: 'hong@ureca.com',
+        //     goalTime: 10000,
+        //     todayTime: 8000,
+        // }));
     }
-
     function handleLogoutButton() {
         dispatch(logout());
         dispatch(resetUser());
@@ -58,7 +40,8 @@ function NavBar(props) {
             <div className="navbar-links">
                 {isLoggedIn ? (
                     <>
-                        <span onClick={() => { navigate("/mypage") }} className="navbar-span navbar-username">{user.nickname}</span>
+                    {/*  */}
+                        <span onClick={()=>{navigate("/mypage")}} className="navbar-span navbar-username">{user.nickname}</span>
                         <span className="navbar-span">님</span>
                         <button onClick={handleLogoutButton} className="mybtn yellow rounded">로그아웃</button>
                     </>

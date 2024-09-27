@@ -1,0 +1,20 @@
+.title-button-container {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+
+.app-title {
+    font-size: 35px;
+    margin: 0;
+}
+
+.create-study-button {
+    font-size: 15px;
+    background-color: #2299FF;
+    border-color: #2299FF;
+    border-radius: 8px;
+    padding: 5px 10px;
+    margin-left: 10px;
+    margin-bottom: 5px;
+}

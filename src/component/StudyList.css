@@ -1,0 +1,22 @@
+.study-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 18px;
+  background-color: white;
+  border: 6px solid #8BC9FF;
+  border-radius: 50px;
+  justify-content: start;
+}
+
+.login-div {
+  padding-top: 40px;
+  justify-content: center;
+  height: 222px; /* StudyCard의 height(180px) + 위아래 padding(18px * 2) */
+  align-items: center;
+  display: flex;
+}
+
+.app-title {
+  font-size: 35px;
+}
