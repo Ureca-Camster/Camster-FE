@@ -1,26 +1,33 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import 'bootstrap/dist/css/bootstrap.min.css';
 import "./App.css";
-import MainPage from "./component/page/MainPage";
-import PostWritePage from "./component/page/PostWritePage";
-import PostViewPage from "./component/page/PostViewPage";
-import LoginPage from "./component/page/LoginPage";
-import RegisterPage from "./component/page/RegisterPage";
-import StudyRoomPage from "./component/page/StudyRoomPage";
-import CamStudyPage from "./component/page/CamStudyPage";
+import Layout from "./component/Layout";
+import MainPage from "./pages/MainPage";
+import PostWritePage from "./pages/PostWritePage";
+import PostViewPage from "./pages/PostViewPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import StudyRoomPage from "./pages/StudyRoomPage";
+import CamStudyPage from "./pages/CamStudyPage";
+import MyPage from "./pages/MyPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route index element={<MainPage />} />
-                <Route path="login" element={<LoginPage />} />
-                <Route path="register" element={<RegisterPage />} />
-                <Route path="study/:studyNo" element={<StudyRoomPage />} />
-                <Route path="study/:studyNo/camstudy" element={<CamStudyPage />} />
-                <Route path="register" element={<RegisterPage />} />
-                <Route path="post-write" element={<PostWritePage />} />
-                <Route path="post/:postId" element={<PostViewPage />} />
+                <Route path="/" element={<Layout />}>
+                    <Route index element={<MainPage />} />
+                    <Route path="login" element={<LoginPage />} />
+                    <Route path="register" element={<RegisterPage />} />
+                    <Route path="mypage" element={<MyPage />} />
+                    <Route path="study/:studyNo" element={<StudyRoomPage />} />
+                    <Route path="study/:studyNo/camstudy" element={<CamStudyPage />} />
+                    <Route path="post-write" element={<PostWritePage />} />
+                    <Route path="post/:postId" element={<PostViewPage />} />
+                </Route>
+                <Route path="/*" element={<NotFoundPage />} />
             </Routes>
         </BrowserRouter>
     );
