@@ -7,16 +7,31 @@
   border: 6px solid #8BC9FF;
   border-radius: 50px;
   justify-content: start;
+  min-height: 222px;
+  /* StudyCard의 height(180px) + 위아래 padding(18px * 2) */
 }
 
 .login-div {
   padding-top: 40px;
   justify-content: center;
-  height: 222px; /* StudyCard의 height(180px) + 위아래 padding(18px * 2) */
+  height: 222px;
+  /* StudyCard의 height(180px) + 위아래 padding(18px * 2) */
   align-items: center;
   display: flex;
 }
 
 .app-title {
   font-size: 35px;
+}
+
+.empty-study-list {
+  width: 100%;
+  height: 180px;
+  /* StudyCard의 height와 동일 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 25px;
+  color: #888;
+  padding-top: 10px;
 }

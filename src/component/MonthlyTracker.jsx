@@ -129,9 +129,9 @@ const MonthlyTracker = ({ memberId }) => {
       <div className='calendar-div'>
       <div className="calendar-header">
         <button className="nav-button" onClick={handlePrevMonth}>◀️</button>
-        <h2>{year} {monthNames[month - 1]}</h2>
+        <h2>{year}<br></br>{monthNames[month - 1]}</h2>
         {!isCurrentMonth && <button className="nav-button" onClick={handleNextMonth}>▶️</button>}
-        {isCurrentMonth && <span className="nav-button-placeholder"></span>}
+        {isCurrentMonth && <div className="nav-button-placeholder"></div>}
       </div>
       <div className="calendar">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
@@ -143,7 +143,7 @@ const MonthlyTracker = ({ memberId }) => {
       {selectedDate && (
         <div className="selected-date-info">
           <span>{selectedDate}</span>
-          <span>{
+          <span style={{letterSpacing:'1px'}}>{
             (() => {
               const record = recordList.find(r => r.date === selectedDate);
               const seconds = record ? record.time : 0;
@@ -153,14 +153,14 @@ const MonthlyTracker = ({ memberId }) => {
               return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
             })()
           }</span>
-          <span>{
+          <span style={{letterSpacing:'1px'}}>{
             (() => {
               const record = recordList.find(r => r.date === selectedDate);
               return record && record.time > 0
                 ? Math.min(100, Math.round((record.time / record.goalTime) * 100))
                 : 0;
             })()
-          }%</span>
+          } %</span>
         </div>
       )}
     </div>

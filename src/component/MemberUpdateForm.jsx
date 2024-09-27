@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../store/userSlice.ts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,6 +17,9 @@ function MemberUpdateForm() {
     const [passwordMatchMessage, setPasswordMatchMessage] = useState('');
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isFormValid, setIsFormValid] = useState(false);
+
+    const confirmPasswordRef = useRef(null);
 
     useEffect(() => {
         if (user) {
@@ -27,29 +30,36 @@ function MemberUpdateForm() {
     }, [user]);
 
     useEffect(() => {
-        if (confirmPassword) {
+        if (newPassword || confirmPassword) {
             if (newPassword === confirmPassword) {
                 setPasswordMatchMessage('비밀번호가 일치합니다.');
+                setIsFormValid(true);
             } else {
                 setPasswordMatchMessage('비밀번호가 일치하지 않습니다.');
+                setIsFormValid(false);
             }
         } else {
             setPasswordMatchMessage('');
+            setIsFormValid(true);
         }
     }, [newPassword, confirmPassword]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        dispatch(
-            setUser({
-                nickname,
-                email: user.email,
-                goalTime,
-                todayTime,
-            })
-        );
-        setNewPassword('');
-        setConfirmPassword('');
+        if (isFormValid) {
+            dispatch(
+                setUser({
+                    nickname,
+                    email: user.email,
+                    goalTime,
+                    todayTime,
+                })
+            );
+            setNewPassword('');
+            setConfirmPassword('');
+        } else {
+            confirmPasswordRef.current.focus();
+        }
     };
 
     const handleTogglePassword = (field) => {
@@ -115,6 +125,7 @@ function MemberUpdateForm() {
                             type={showConfirmPassword ? 'text' : 'password'}
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
+                            ref={confirmPasswordRef}
                         />
                         <FontAwesomeIcon 
                             icon={faEye}
@@ -130,7 +141,11 @@ function MemberUpdateForm() {
                         {passwordMatchMessage}
                     </div>
                 </div>
-                <button className='mybtn skyblue rounded' type='submit'>
+                <button 
+                    className={`mybtn skyblue rounded ${!isFormValid ? 'disabled' : ''}`} 
+                    type='submit'
+                    disabled={!isFormValid}
+                >
                     수정 완료
                 </button>
             </form>
