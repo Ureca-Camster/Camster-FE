@@ -3,22 +3,6 @@ import { useSelector } from "react-redux";
 import styled, { createGlobalStyle } from "styled-components";
 import WebFont from 'webfontloader';
 
-const GlobalStyle = createGlobalStyle`
-    @font-face {
-        font-family: 'Paperlogy-8ExtraBold';
-        src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-8ExtraBold.woff2') format('woff2');
-        font-weight: 600;
-        font-style: normal;
-    }
-    @font-face {
-        font-family: 'Krona One';
-        src: url('https://fonts.gstatic.com/s/kronaone/v14/jAnEgHdjHcjgfIb1ZcUCMY-h.woff2') format('woff2');
-        font-weight: 400;
-        font-style: normal;
-        font-display: swap;
-    }
-`;
-
 const formatTime = (seconds) => {
     const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
     const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
@@ -89,7 +73,7 @@ const RightText = styled.div`
 `;
 
 const AchievementText = styled.span`
-    font-family: 'Paperlogy-8ExtraBold', sans-serif;
+    font-family: 'Paperlogy-5Medium', sans-serif;
 `;
 
 const PercentageText = styled.span`
@@ -155,26 +139,23 @@ function TodayProgress() {
 
     if (!fontLoaded) return null;
     return (
-        <>
-            <GlobalStyle />
-            <ProgressBarContainer>
-                <DateTextContainer>
-                    <DateText ref={dateTextRef}>
-                        {currentDate}
-                    </DateText>
-                </DateTextContainer>
-                <ProgressBar>
-                    <Progress width={progressWidth} isLoggedIn={isLoggedIn} />
-                </ProgressBar>
-                <TimeInfo>
-                    <LeftText>{`${todayTimeFormatted} / ${goalTimeFormatted}`}</LeftText>
-                    <RightText>
-                        <AchievementText>달성률 </AchievementText>
-                        <PercentageText>{progressPercentage}%</PercentageText>
-                    </RightText>
-                </TimeInfo>
-            </ProgressBarContainer>
-        </>
+        <ProgressBarContainer>
+            <DateTextContainer>
+                <DateText ref={dateTextRef}>
+                    {currentDate}
+                </DateText>
+            </DateTextContainer>
+            <ProgressBar>
+                <Progress width={progressWidth} isLoggedIn={isLoggedIn} />
+            </ProgressBar>
+            <TimeInfo>
+                <LeftText>{`${todayTimeFormatted} / ${goalTimeFormatted}`}</LeftText>
+                <RightText>
+                    <AchievementText>달성률 </AchievementText>
+                    <PercentageText>{progressPercentage}%</PercentageText>
+                </RightText>
+            </TimeInfo>
+        </ProgressBarContainer>
     );
 }
 

@@ -129,10 +129,10 @@ function MainPage() {
     return (
         <Container>
             <Row className='mb-3'>
-                <Col>
+                <Col xs="8">
                     <TodayProgress />
                 </Col>
-                <Col>
+                <Col xs="4">
                     <Rank />
                 </Col>
             </Row>
