@@ -74,6 +74,7 @@ const RightText = styled.div`
 
 const AchievementText = styled.span`
     font-family: 'Paperlogy-5Medium', sans-serif;
+    letter-spacing: 2px;
 `;
 
 const PercentageText = styled.span`

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Col, Container, Row } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
+import { useAppSelector, useAppDispatch } from '../store/hooks.ts';
+import { addMyStudyGroup, resetMyStudyGroups, setMyStudyGroups  } from '../store/myStudyGroupsSlice.ts';
 import { useNavigate } from 'react-router-dom';
 import Rank from '../component/Rank';
 import TodayProgress from '../component/TodayProgress';
@@ -10,61 +11,65 @@ import StudyCreateModal from '../component/StudyCreateModal';
 import './MainPage.css'
 
 function MainPage() {
-    const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
+    const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
+    const myStudyGroups = useAppSelector((state) => state.myStudyGroups.myStudyGroups);
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const [showJoinModal, setShowJoinModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedStudy, setSelectedStudy] = useState(null);
-    const [myStudyGroups, setMyStudyGroups] = useState([
-        {
-          studyId: 100,
-          studyName: "Java 알고리즘 스터디",
-          description: "소개가 엄청나게 길어지면 어떻게 될까요? 저도 궁금해서 지금 테스트를 해보려고 합니다. 결과가 궁금합니다. 곧 월즈가 시작하는데 떨려서 죽겠습니다 아 맞다 장패드 포카 교환해야 하는데!",
-          emoji: "✨"
-        },
-        {
-          studyId: 200,
-          studyName: "Python 알고리즘 스터디",
-          description: "뭐 어쩌구 저쩌구 소개",
-          emoji: "🐧"
-        },
-        {
-          studyId: 220,
-          studyName: "Figma 도전",
-          description: "뭐 어쩌구 저쩌구 소개",
-          emoji: "🔥"
-        }
-    ]);
-    const [allStudyGroups, setAllStudyGroups] = useState([
-        {
-            "studyId": 10,
-            "studyName": "C++ 알고리즘 스터디",
-            "description": "뭐 어쩌구 저쩌구 소개",
-            "emoji": "💎",
-            "isPublic": false
-        },
-        {
-            "studyId": 20,
-            "studyName": "Python 기초 뽀개기길어져라 제목아",
-            "description": "뭐 어쩌구 저쩌구 소개",
-            "emoji": "😑",
-            "isPublic": false
-        },
-        {
-            "studyId": 30,
-            "studyName": "Zoom 클론 코딩",
-            "description": "뭐 어쩌구 저쩌구 소개.. 두 줄 정도는 쓸 수 있잖아",
-            "emoji": "👬",
-            "isPublic": true
-        },
-        {
-            "studyId": 40,
-            "studyName": "정보보안기사 으쌰",
-            "description": "뭐 어쩌구 저쩌구 소개",
-            "emoji": "💪",
-            "isPublic": true
-        }
-    ]);
+    const [allStudyGroups, setAllStudyGroups] = useState([]);
+
+    useEffect(() => {
+        const fetchMyStudyGroups = async () => {
+            if (isLoggedIn && myStudyGroups.length === 0) {
+                try {
+                    const response = await fetch('/studies/mystudies', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        dispatch(setMyStudyGroups(data));
+                    } else {
+                        console.error('Failed to fetch my study groups');
+                    }
+                } catch (error) {
+                    console.error('Error fetching my study groups:', error);
+                }
+            } else if (!isLoggedIn && myStudyGroups.length > 0) {
+                // 로그아웃 상태이고 myStudyGroups에 데이터가 있으면 초기화
+                dispatch(resetMyStudyGroups());
+            }
+        };
+
+        fetchMyStudyGroups();
+    }, [isLoggedIn, myStudyGroups.length, dispatch]);
+
+    useEffect(() => {
+        const fetchAllStudyGroups = async () => {
+            try {
+                const response = await fetch('/studies', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setAllStudyGroups(data);
+                } else {
+                    console.error('Failed to fetch all study groups');
+                }
+            } catch (error) {
+                console.error('Error fetching all study groups:', error);
+            }
+        };
+
+        fetchAllStudyGroups();
+    }, []);
 
     const handleStudyClick = (studyId, isPublic) => {
         if (!isLoggedIn) {
@@ -93,7 +98,7 @@ function MainPage() {
 
             if (response.ok) {
                 // 스터디 가입 성공
-                setMyStudyGroups([...myStudyGroups, selectedStudy]);
+                addMyStudyGroup(selectedStudy);
                 navigate(`/study/${selectedStudy.studyId}`);
             } else {
                 // 스터디 가입 실패
@@ -116,7 +121,7 @@ function MainPage() {
                 studyId: Date.now(), // Use a proper ID generation in production
                 ...studyData
             };
-            setMyStudyGroups([...myStudyGroups, newStudy]);
+            dispatch(addMyStudyGroup(newStudy));
             setShowCreateModal(false);
             // Optionally navigate to the new study page
             // navigate(`/study/${newStudy.studyId}`);
@@ -151,6 +156,7 @@ function MainPage() {
                             studies={myStudyGroups} 
                             onStudyClick={handleStudyClick} 
                             isClickable={true}
+                            isMyStudyList={true}
                         />
                     ) : (
                         <div className="study-list login-div">
@@ -172,6 +178,7 @@ function MainPage() {
                         studies={allStudyGroups} 
                         onStudyClick={handleStudyClick} 
                         isClickable={isLoggedIn}
+                        isMyStudyList={false}
                     />
                 </div>
             </Row>

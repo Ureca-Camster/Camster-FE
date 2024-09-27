@@ -5,6 +5,7 @@ import { combineReducers } from 'redux';
 import loginReducer from './loginSlice.ts';
 import userReducer from './userSlice.ts';
 import rankReducer from './rankSlice.ts';
+import myStudyGroupsReducer from './myStudyGroupsSlice.ts';
 
 const persistConfig = {
     key: 'root',
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
     login: loginReducer,
     user: userReducer,
     rank: rankReducer,
+    myStudyGroups: myStudyGroupsReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
