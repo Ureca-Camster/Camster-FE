@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format, addMonths, subMonths, isToday, isSameMonth } from 'date-fns';
 import './MonthlyTracker.css';
+import { useSelector } from 'react-redux';
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
@@ -8,6 +9,8 @@ const monthNames = [
 ];
 
 const MonthlyTracker = ({ memberId }) => {
+  const user = useSelector((state) => state.user);
+
   const currentDate = new Date();
   const [year, setYear] = useState(currentDate.getFullYear());
   const [month, setMonth] = useState(currentDate.getMonth() + 1);
@@ -22,18 +25,15 @@ const MonthlyTracker = ({ memberId }) => {
     setRecordList([
       {
         "date":"2024-09-08",
-        "time": 10530,
-        "goalTime": 10000
+        "time": 10530
       },
       {
         "date":"2024-09-09",
-        "time": 8022,
-        "goalTime": 10000
+        "time": 8022
       },
       {
         "date":"2024-09-13",
-        "time": 8096,
-        "goalTime": 10000
+        "time": 8096
       }
     ]);
   }, [memberId, year, month]);
@@ -91,7 +91,7 @@ const MonthlyTracker = ({ memberId }) => {
       const record = recordList.find(r => r.date === date);
       const hasData = record && record.time > 0;
       const isCurrentDay = isToday(new Date(date));
-      const percentage = hasData ? Math.min(100, Math.round((record.time / record.goalTime) * 100)) : 0;
+      const percentage = hasData ? Math.min(100, Math.round((record.time / user.goalTime) * 100)) : 0;
 
       let backgroundColor;
       if (hasData) {
@@ -157,7 +157,7 @@ const MonthlyTracker = ({ memberId }) => {
             (() => {
               const record = recordList.find(r => r.date === selectedDate);
               return record && record.time > 0
-                ? Math.min(100, Math.round((record.time / record.goalTime) * 100))
+                ? Math.min(100, Math.round((record.time / user.goalTime) * 100))
                 : 0;
             })()
           } %</span>

@@ -9,6 +9,7 @@ import StudyList from '../component/StudyList';
 import StudyJoinModal from '../component/StudyJoinModal';
 import StudyCreateModal from '../component/StudyCreateModal';
 import './MainPage.css'
+import Swal from 'sweetalert2';
 
 function MainPage() {
     const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
@@ -73,7 +74,12 @@ function MainPage() {
 
     const handleStudyClick = (studyId, isPublic) => {
         if (!isLoggedIn) {
-            alert('로그인 후 이용 가능합니다.');
+            Swal.fire({
+                text: '로그인 후 이용 가능합니다.',
+                icon: "warning",
+                timer: 1200,
+                showConfirmButton: false
+            })
             return;
         }
 
@@ -102,11 +108,21 @@ function MainPage() {
                 navigate(`/study/${selectedStudy.studyId}`);
             } else {
                 // 스터디 가입 실패
-                alert('스터디 가입에 실패했습니다.');
+                Swal.fire({
+                    text: '스터디 가입에 실패했습니다.',
+                    icon: "error",
+                    timer: 1200,
+                    showConfirmButton: false
+                })
             }
         } catch (error) {
             console.error('Error joining study:', error);
-            alert('스터디 가입 중 오류가 발생했습니다.');
+            Swal.fire({
+                text: '스터디 가입 중 오류가 발생했습니다.',
+                icon: "error",
+                timer: 1200,
+                showConfirmButton: false
+            })
         }
 
         setShowJoinModal(false);
@@ -145,7 +161,12 @@ function MainPage() {
             }
         } catch (error) {
             console.error('Error creating study:', error);
-            alert('스터디 생성 중 오류가 발생했습니다.');
+            Swal.fire({
+                text: '스터디 생성 중 오류가 발생했습니다.',
+                icon: "error",
+                timer: 1200,
+                showConfirmButton: false
+            })
         }
     };
 

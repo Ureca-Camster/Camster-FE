@@ -1,36 +1,27 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { setUser } from '../store/userSlice.ts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import './Input.css';
-import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2/src/sweetalert2.js'
 
-function MemberUpdateForm() {
-    const dispatch = useDispatch();
-    const user = useSelector((state) => state.user);
-
+function RegisterForm() {
+    const [email, setEmail] = useState('');
     const [nickname, setNickname] = useState('');
     const [goalTime, setGoalTime] = useState('');
-    const [newPassword, setNewPassword] = useState('');
+    const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordMatchMessage, setPasswordMatchMessage] = useState('');
-    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isFormValid, setIsFormValid] = useState(false);
+    const navigate = useNavigate();
 
     const confirmPasswordRef = useRef(null);
 
     useEffect(() => {
-        if (user) {
-            setNickname(user.nickname);
-            setGoalTime(user.goalTime);
-        }
-    }, [user]);
-
-    useEffect(() => {
-        if (newPassword || confirmPassword) {
-            if (newPassword === confirmPassword) {
+        if (password || confirmPassword) {
+            if (password === confirmPassword) {
                 setPasswordMatchMessage('비밀번호가 일치합니다.');
                 setIsFormValid(true);
             } else {
@@ -41,69 +32,73 @@ function MemberUpdateForm() {
             setPasswordMatchMessage('');
             setIsFormValid(false);
         }
-    }, [newPassword, confirmPassword]);
+    }, [password, confirmPassword]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isFormValid) {
-            dispatch(
-                setUser({
-                    memberId: user.memberId,
-                    nickname: nickname,
-                    email: user.email,
-                    goalTime: goalTime,
-                    todayTime: user.todayTime
-                })
-            );
-
-            try {
-                const response = await fetch('/members', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        nickname: nickname,
-                        memberPassword: newPassword,
-                        goalTime: goalTime
-                    }),
-                });
-
-                if(response.ok) {
-                    setNewPassword('');
-                    setConfirmPassword('');
         
-                    Swal.fire({
-                        title: "수정 완료!",
-                        icon: "success",
-                        timer: 1200,
-                        showConfirmButton: false
-                    })
-                }
-            } catch (error) {
-                console.error('Error creating study:', error);
+        if (!isFormValid) {
+            confirmPasswordRef.current.focus();
+            return;
+        }
+
+        const userData = {
+            nickname,
+            email,
+            memberPassword: password,
+            goalTime: goalTime
+        };
+
+        try {
+            const response = await fetch('/members/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            });
+
+            if (response.ok) {
                 Swal.fire({
-                    text: '업데이트 중 오류가 발생했습니다.',
-                    icon: "error",
-                    timer: 1200,
-                    showConfirmButton: false
+                    icon: "success",
+                    title: "회원가입 완료!",
+                    showConfirmButton: false,
+                    timer: 1200
+                })
+                alert('');
+                navigate('/');
+            } else {
+                const errorData = await response.json();
+                Swal.fire({
+                    icon: "warning",
+                    title: "회원가입 실패",
+                    text: `${errorData.message}`,
+                    showConfirmButton: false,
+                    timer: 1200
                 })
             }
-        } else {
-            confirmPasswordRef.current.focus();
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: "warning",
+                title: "회원가입 실패",
+                text: "회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.",
+                showConfirmButton: false,
+                timer: 1200
+            })
         }
     };
 
     const handleTogglePassword = (field) => {
         if (field === 'new') {
-            setShowNewPassword(!showNewPassword);
+            setShowPassword(!showPassword);
         } else if (field === 'confirm') {
             setShowConfirmPassword(!showConfirmPassword);
         }
     };
 
     return (
-        <div className='modify-form'>
+        <div className='register-form'>
             <form onSubmit={handleSubmit}>
                 <div className="input-wrapper">
                     <label>닉네임</label><br />
@@ -116,7 +111,12 @@ function MemberUpdateForm() {
                 </div>
                 <div className="input-wrapper">
                     <label>이메일</label><br />
-                    <input type='email' value={user.email} readOnly />
+                    <input
+                        type='email'
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
                 </div>
                 <div className="input-wrapper">
                     <label>목표 학습 시간</label><br />
@@ -128,31 +128,32 @@ function MemberUpdateForm() {
                     />
                 </div>
                 <div className="input-wrapper">
-                    <label>비밀번호 수정</label><br />
+                    <label>비밀번호</label><br />
                     <div className="password-input-wrapper">
                         <input
-                            type={showNewPassword ? 'text' : 'password'}
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
+                            type={showPassword ? 'text' : 'password'}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             required
                         />
                         <FontAwesomeIcon 
                             icon={faEye}
                             onMouseDown={() => handleTogglePassword('new')}
                             onMouseUp={() => handleTogglePassword('new')}
-                            onMouseLeave={() => setShowNewPassword(false)}
+                            onMouseLeave={() => setShowPassword(false)}
                             className="password-toggle"
                         />
                     </div>
                 </div>
                 <div className="input-wrapper" style={{marginBottom: '2px'}}>
-                    <label>비밀번호 수정 확인</label><br />
+                    <label>비밀번호 확인</label><br />
                     <div className="password-input-wrapper">
                         <input
                             type={showConfirmPassword ? 'text' : 'password'}
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             ref={confirmPasswordRef}
+                            required
                         />
                         <FontAwesomeIcon 
                             icon={faEye}
@@ -163,7 +164,7 @@ function MemberUpdateForm() {
                         />
                     </div>
                     <div className={
-                        `password-match-message ${newPassword === confirmPassword ? 'match' : 'mismatch'}
+                        `password-match-message ${password === confirmPassword ? 'match' : 'mismatch'}
                         ${passwordMatchMessage === '' ? 'nonexist' : 'exist'}`}>
                         {passwordMatchMessage}
                     </div>
@@ -172,11 +173,11 @@ function MemberUpdateForm() {
                     className={'mybtn skyblue rounded'} 
                     type='submit'
                 >
-                    수정 완료
+                    가입
                 </button>
             </form>
         </div>
     );
 }
 
-export default MemberUpdateForm;
+export default RegisterForm;

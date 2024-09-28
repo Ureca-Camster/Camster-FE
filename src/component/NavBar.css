@@ -100,29 +100,3 @@
     box-shadow: 0 0 #7ec3fe; 
     background-color: #7ec3fe;
 }
-
-/* New styles for form layout */
-.login-form,
-.modify-form {
-    width: 100%;
-    max-width: 300px; /* Adjust this value based on your design preferences */
-    margin: 0 auto;
-}
-
-.login-form .input-wrapper,
-.modify-form .input-wrapper {
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-.login-form input,
-.modify-form input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 5px;
-}
-
-.login-form .mybtn.skyblue,
-.modify-form .mybtn.skyblue {
-    width: 100%;
-}
