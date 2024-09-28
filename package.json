@@ -1,4 +1,5 @@
 {
+  "proxy":"http://localhost:8080",
   "name": "camster-fe",
   "version": "0.1.0",
   "private": true,
