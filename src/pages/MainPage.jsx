@@ -104,7 +104,12 @@ function MainPage() {
 
             if (response.ok) {
                 // 스터디 가입 성공
-                addMyStudyGroup(selectedStudy);
+                dispatch(addMyStudyGroup({
+                    studyId: selectedStudy.studyId,
+                    studyName: selectedStudy.studyName,
+                    description: selectedStudy.discription,
+                    emoji: selectedStudy.emoji
+                }));
                 navigate(`/study/${selectedStudy.studyId}`);
             } else {
                 // 스터디 가입 실패
@@ -147,15 +152,13 @@ function MainPage() {
 
             if (response.ok) {
                 const { studyId } = await response.json();
-                // Explicitly convert studyId to string
-                const newStudy = {
-                    ...studyData,
-                    studyId: String(studyId)
-                };
-                dispatch(addMyStudyGroup(newStudy));
-                setShowCreateModal(false);
-                // Optionally navigate to the new study page
-                // navigate(`/study/${newStudy.studyId}`);
+                dispatch(addMyStudyGroup({
+                    studyId: studyId,
+                    studyName: studyData.studyName,
+                    description: studyData.description,
+                    emoji: studyData.emoji
+                }));
+                navigate(`/study/${studyId}`);
             } else {
                 throw new Error('Failed to create study');
             }
@@ -195,7 +198,6 @@ function MainPage() {
                             studies={myStudyGroups} 
                             onStudyClick={handleStudyClick} 
                             isClickable={true}
-                            isMyStudyList={true}
                         />
                     ) : (
                         <div className="study-list login-div">
@@ -217,7 +219,6 @@ function MainPage() {
                         studies={allStudyGroups} 
                         onStudyClick={handleStudyClick} 
                         isClickable={isLoggedIn}
-                        isMyStudyList={false}
                     />
                 </div>
             </Row>
