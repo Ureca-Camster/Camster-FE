@@ -4,6 +4,7 @@ import { setUser } from '../store/userSlice.ts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import './Input.css';
+import Swal from 'sweetalert2';
 
 function MemberUpdateForm() {
     const dispatch = useDispatch();
@@ -38,22 +39,56 @@ function MemberUpdateForm() {
             }
         } else {
             setPasswordMatchMessage('');
-            setIsFormValid(true);
+            setIsFormValid(false);
         }
     }, [newPassword, confirmPassword]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (isFormValid) {
             dispatch(
                 setUser({
-                    nickname,
+                    memberId: user.memberId,
+                    nickname: nickname,
                     email: user.email,
-                    goalTime,
+                    goalTime: goalTime,
+                    todayTime: user.todayTime
                 })
             );
-            setNewPassword('');
-            setConfirmPassword('');
+
+            try {
+                const response = await fetch('/members', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nickname: nickname,
+                        memberPassword: newPassword,
+                        goalTime: goalTime
+                    }),
+                });
+
+                if(response.ok) {
+                    setNewPassword('');
+                    setConfirmPassword('');
+        
+                    Swal.fire({
+                        title: "수정 완료!",
+                        icon: "success",
+                        timer: 1200,
+                        showConfirmButton: false
+                    })
+                }
+            } catch (error) {
+                console.error('Error creating study:', error);
+                Swal.fire({
+                    text: '업데이트 중 오류가 발생했습니다.',
+                    icon: "error",
+                    timer: 1200,
+                    showConfirmButton: false
+                })
+            }
         } else {
             confirmPasswordRef.current.focus();
         }
@@ -76,6 +111,7 @@ function MemberUpdateForm() {
                         type='text'
                         value={nickname}
                         onChange={(e) => setNickname(e.target.value)}
+                        required
                     />
                 </div>
                 <div className="input-wrapper">
@@ -88,6 +124,7 @@ function MemberUpdateForm() {
                         type='number'
                         value={goalTime}
                         onChange={(e) => setGoalTime(e.target.value)}
+                        required
                     />
                 </div>
                 <div className="input-wrapper">
@@ -97,6 +134,7 @@ function MemberUpdateForm() {
                             type={showNewPassword ? 'text' : 'password'}
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
+                            required
                         />
                         <FontAwesomeIcon 
                             icon={faEye}
@@ -131,9 +169,8 @@ function MemberUpdateForm() {
                     </div>
                 </div>
                 <button 
-                    className={`mybtn skyblue rounded ${!isFormValid ? 'disabled' : ''}`} 
+                    className={'mybtn skyblue rounded'} 
                     type='submit'
-                    disabled={!isFormValid}
                 >
                     수정 완료
                 </button>

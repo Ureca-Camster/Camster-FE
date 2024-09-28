@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import './Input.css';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2/src/sweetalert2.js'
 
 function RegisterForm() {
     const [email, setEmail] = useState('');
@@ -58,15 +59,33 @@ function RegisterForm() {
             });
 
             if (response.ok) {
-                alert('회원가입 완료!');
+                Swal.fire({
+                    icon: "success",
+                    title: "회원가입 완료!",
+                    showConfirmButton: false,
+                    timer: 1200
+                })
+                alert('');
                 navigate('/');
             } else {
                 const errorData = await response.json();
-                alert(`회원가입 실패: ${errorData.message}`);
+                Swal.fire({
+                    icon: "warning",
+                    title: "회원가입 실패",
+                    text: `${errorData.message}`,
+                    showConfirmButton: false,
+                    timer: 1200
+                })
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('회원가입 중 오류가 발생했습니다.');
+            Swal.fire({
+                icon: "warning",
+                title: "회원가입 실패",
+                text: "회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.",
+                showConfirmButton: false,
+                timer: 1200
+            })
         }
     };
 
@@ -151,9 +170,8 @@ function RegisterForm() {
                     </div>
                 </div>
                 <button 
-                    className={`mybtn skyblue rounded ${!isFormValid ? 'disabled' : ''}`} 
+                    className={'mybtn skyblue rounded'} 
                     type='submit'
-                    disabled={!isFormValid}
                 >
                     가입
                 </button>
