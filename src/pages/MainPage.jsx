@@ -1,72 +1,85 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Col, Container, Row } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
+import { useAppSelector, useAppDispatch } from '../store/hooks.ts';
+import { addMyStudyGroup, resetMyStudyGroups, setMyStudyGroups  } from '../store/myStudyGroupsSlice.ts';
 import { useNavigate } from 'react-router-dom';
 import Rank from '../component/Rank';
 import TodayProgress from '../component/TodayProgress';
 import StudyList from '../component/StudyList';
 import StudyJoinModal from '../component/StudyJoinModal';
+import StudyCreateModal from '../component/StudyCreateModal';
 import './MainPage.css'
+import Swal from 'sweetalert2';
 
 function MainPage() {
-    const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
+    const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
+    const myStudyGroups = useAppSelector((state) => state.myStudyGroups.myStudyGroups);
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const [showModal, setShowModal] = useState(false);
+    const [showJoinModal, setShowJoinModal] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedStudy, setSelectedStudy] = useState(null);
-    const [myStudyGroups, setMyStudyGroups] = useState([
-        {
-          studyId: 100,
-          studyName: "Java 알고리즘 스터디",
-          description: "소개가 엄청나게 길어지면 어떻게 될까요? 저도 궁금해서 지금 테스트를 해보려고 합니다. 결과가 궁금합니다. 곧 월즈가 시작하는데 떨려서 죽겠습니다 아 맞다 장패드 포카 교환해야 하는데!",
-          emoji: "✨"
-        },
-        {
-          studyId: 200,
-          studyName: "Python 알고리즘 스터디",
-          description: "뭐 어쩌구 저쩌구 소개",
-          emoji: "🐧"
-        },
-        {
-          studyId: 220,
-          studyName: "Figma 도전",
-          description: "뭐 어쩌구 저쩌구 소개",
-          emoji: "🔥"
-        }
-    ]);
-    const [allStudyGroups, setAllStudyGroups] = useState([
-        {
-            "studyId": 10,
-            "studyName": "C++ 알고리즘 스터디",
-            "description": "뭐 어쩌구 저쩌구 소개",
-            "emoji": "💎",
-            "isPublic": false
-        },
-        {
-            "studyId": 20,
-            "studyName": "Python 기초 뽀개기길어져라 제목아",
-            "description": "뭐 어쩌구 저쩌구 소개",
-            "emoji": "😑",
-            "isPublic": false
-        },
-        {
-            "studyId": 30,
-            "studyName": "Zoom 클론 코딩",
-            "description": "뭐 어쩌구 저쩌구 소개.. 두 줄 정도는 쓸 수 있잖아",
-            "emoji": "👬",
-            "isPublic": true
-        },
-        {
-            "studyId": 40,
-            "studyName": "정보보안기사 으쌰",
-            "description": "뭐 어쩌구 저쩌구 소개",
-            "emoji": "💪",
-            "isPublic": true
-        }
-    ]);
+    const [allStudyGroups, setAllStudyGroups] = useState([]);
+
+    useEffect(() => {
+        const fetchMyStudyGroups = async () => {
+            if (isLoggedIn && myStudyGroups.length === 0) {
+                try {
+                    const response = await fetch('/studies/mystudies', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        dispatch(setMyStudyGroups(data));
+                    } else {
+                        console.error('Failed to fetch my study groups');
+                    }
+                } catch (error) {
+                    console.error('Error fetching my study groups:', error);
+                }
+            } else if (!isLoggedIn && myStudyGroups.length > 0) {
+                // 로그아웃 상태이고 myStudyGroups에 데이터가 있으면 초기화
+                dispatch(resetMyStudyGroups());
+            }
+        };
+
+        fetchMyStudyGroups();
+    }, [isLoggedIn, myStudyGroups.length, dispatch]);
+
+    useEffect(() => {
+        const fetchAllStudyGroups = async () => {
+            try {
+                const response = await fetch('/studies', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setAllStudyGroups(data);
+                } else {
+                    console.error('Failed to fetch all study groups');
+                }
+            } catch (error) {
+                console.error('Error fetching all study groups:', error);
+            }
+        };
+
+        fetchAllStudyGroups();
+    }, []);
 
     const handleStudyClick = (studyId, isPublic) => {
         if (!isLoggedIn) {
-            alert('로그인 후 이용 가능합니다.');
+            Swal.fire({
+                text: '로그인 후 이용 가능합니다.',
+                icon: "warning",
+                timer: 1200,
+                showConfirmButton: false
+            })
             return;
         }
 
@@ -75,7 +88,7 @@ function MainPage() {
             navigate(`/study/${studyId}`);
         } else {
             setSelectedStudy(allStudyGroups.find(s => s.studyId === studyId));
-            setShowModal(true);
+            setShowJoinModal(true);
         }
     };
 
@@ -91,28 +104,82 @@ function MainPage() {
 
             if (response.ok) {
                 // 스터디 가입 성공
-                setMyStudyGroups([...myStudyGroups, selectedStudy]);
+                dispatch(addMyStudyGroup({
+                    studyId: selectedStudy.studyId,
+                    studyName: selectedStudy.studyName,
+                    description: selectedStudy.discription,
+                    emoji: selectedStudy.emoji
+                }));
                 navigate(`/study/${selectedStudy.studyId}`);
             } else {
                 // 스터디 가입 실패
-                alert('스터디 가입에 실패했습니다.');
+                Swal.fire({
+                    text: '스터디 가입에 실패했습니다.',
+                    icon: "error",
+                    timer: 1200,
+                    showConfirmButton: false
+                })
             }
         } catch (error) {
             console.error('Error joining study:', error);
-            alert('스터디 가입 중 오류가 발생했습니다.');
+            Swal.fire({
+                text: '스터디 가입 중 오류가 발생했습니다.',
+                icon: "error",
+                timer: 1200,
+                showConfirmButton: false
+            })
         }
 
-        setShowModal(false);
+        setShowJoinModal(false);
         setSelectedStudy(null);
+    };
+
+    const handleCreateStudy = async (studyData) => {
+        try {
+            const response = await fetch('/studies', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    studyName: studyData.studyName,
+                    description: studyData.description,
+                    emoji: studyData.emoji,
+                    isPublic: studyData.isPublic,
+                    studyPassword: studyData.studyPassword
+                }),
+            });
+
+            if (response.ok) {
+                const { studyId } = await response.json();
+                dispatch(addMyStudyGroup({
+                    studyId: studyId,
+                    studyName: studyData.studyName,
+                    description: studyData.description,
+                    emoji: studyData.emoji
+                }));
+                navigate(`/study/${studyId}`);
+            } else {
+                throw new Error('Failed to create study');
+            }
+        } catch (error) {
+            console.error('Error creating study:', error);
+            Swal.fire({
+                text: '스터디 생성 중 오류가 발생했습니다.',
+                icon: "error",
+                timer: 1200,
+                showConfirmButton: false
+            })
+        }
     };
 
     return (
         <Container>
-            <Row>
-                <Col>
+            <Row className='mb-3'>
+                <Col xs="8">
                     <TodayProgress />
                 </Col>
-                <Col>
+                <Col xs="4">
                     <Rank />
                 </Col>
             </Row>
@@ -121,7 +188,7 @@ function MainPage() {
                     <div className="title-button-container">
                         <h1 className="app-title">내 스터디 목록👀</h1>
                         {isLoggedIn && (
-                            <Button className="create-study-button" onClick={() => {/* 스터디 개설 모달 */}}>
+                            <Button className="create-study-button" onClick={() => setShowCreateModal(true)}>
                                 스터디 개설하기
                             </Button>
                         )}
@@ -156,10 +223,15 @@ function MainPage() {
                 </div>
             </Row>
             <StudyJoinModal 
-                show={showModal}
-                onHide={() => setShowModal(false)}
+                show={showJoinModal}
+                onHide={() => setShowJoinModal(false)}
                 onJoin={handleJoinStudy}
                 isPublic={selectedStudy?.isPublic}
+            />
+            <StudyCreateModal
+                show={showCreateModal}
+                onHide={() => setShowCreateModal(false)}
+                onSubmit={handleCreateStudy}
             />
         </Container>
     );

@@ -8,6 +8,7 @@
   background-color: #FDFDFD;
   padding: 10px 15px 15px 15px;
   border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .calendar-header {
@@ -38,6 +39,7 @@
   align-items: center;
   justify-content: center;
   height: 36px;
+  width: 44px;
 }
 
 .nav-button-placeholder {
@@ -88,10 +90,10 @@
 
 .selected-date-info {
   margin-top: 15px;
-  padding: 15px;
+  padding: 15px 15px;
   background-color: #FDFDFD;
   border-radius: 10px;
-  /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
 }

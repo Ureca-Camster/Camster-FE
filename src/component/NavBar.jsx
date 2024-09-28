@@ -11,6 +11,7 @@ function NavBar(props) {
     const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
     const user = useSelector((state) => state.user);
     const navigate = useNavigate();
+
     function handleLoginButton() {
         navigate("/login");
         // dispatch(login());
@@ -33,7 +34,7 @@ function NavBar(props) {
                     src={camsterLogo}
                     alt="Camster logo"
                     className="navbar-logo-img"
-                    onClick={()=>{navigate("/")}}
+                    onClick={() => { navigate("/") }}
                 />
             </div>
             <div className="navbar-links">
@@ -46,7 +47,7 @@ function NavBar(props) {
                     </>
                 ) : (
                     <>
-                        <button onClick={()=>{navigate("/register")}} className="mybtn yellow rounded">회원가입</button>
+                        <button onClick={() => { navigate("/register") }} className="mybtn yellow rounded">회원가입</button>
                         <button onClick={handleLoginButton} className="mybtn red rounded">로그인</button>
                     </>
                 )}

@@ -15,8 +15,8 @@ function MyPage() {
             {isLoggedIn ? (
                 <Container>
                     <Row>
-                        <Col><MonthlyTracker /></Col>
-                        <Col><MemberUpdateForm /></Col>
+                        <Col xs="8" style={{padding:"0"}}><MonthlyTracker /></Col>
+                        <Col xs="4" style={{padding:"0"}}><MemberUpdateForm /></Col>
                     </Row>
                 </Container>
             ) : (
