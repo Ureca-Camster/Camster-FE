@@ -2,7 +2,7 @@ import React from 'react';
 import StudyCard from './StudyCard';
 import './StudyList.css';
 
-const StudyList = ({ studies, onStudyClick, isClickable, isMyStudyList }) => {
+const StudyList = ({ studies, onStudyClick, isClickable }) => {
     return (
         <div className="study-list">
             {studies.length > 0 ? (
@@ -16,7 +16,6 @@ const StudyList = ({ studies, onStudyClick, isClickable, isMyStudyList }) => {
                         isPublic={study.isPublic}
                         onClick={isClickable ? onStudyClick : undefined}
                         isClickable={isClickable}
-                        isMyStudy={isMyStudyList}
                     />
                 ))
             ) : (
