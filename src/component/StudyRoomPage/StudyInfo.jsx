@@ -9,14 +9,14 @@ function StudyInfo({
   onMemberListClick,
   onCamStudyClick,
   onLeaveClick,
-  isCreator
+  isLeader
 }) {
   return (
     <div style={styles.container}>
-      <h1>{studyRoom.studyName} 스터디룸</h1>
+      <h1>{studyRoom.studyName}</h1>
       <div style={styles.descriptionBox}>
         <p>{studyRoom.description}</p>
-        {isCreator && (
+        {isLeader && (
           <FaEdit
             style={styles.editIcon}
             onClick={onEditClick}

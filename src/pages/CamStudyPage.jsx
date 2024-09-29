@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { OpenVidu } from 'openvidu-browser';
 import { useAppSelector } from '../store/hooks.ts';
 import { useParams } from 'react-router-dom';
+import { CiLogout } from "react-icons/ci";
+import { IoVideocam, IoVideocamOff } from "react-icons/io5";
+import { MdMic, MdMicOff } from "react-icons/md";
+
+import './CamStudyPage.css'
 
 const CamStudyPage = () => {
     const { studyId } = useParams();
@@ -11,6 +16,8 @@ const CamStudyPage = () => {
     const [publisher, setPublisher] = useState(null);
     const [subscribers, setSubscribers] = useState([]);
     const [error, setError] = useState('');
+    const [isVideoOn, setIsVideoOn] = useState(true);
+    const [isAudioOn, setIsAudioOn] = useState(true);
 
     const OV = useRef(new OpenVidu());
 
@@ -37,7 +44,7 @@ const CamStudyPage = () => {
             console.log('Create session response:', data);
             return data.sessionId || data.id || sessionId;
         };
-    
+
         const createToken = async (sessionId) => {
             if (!sessionId) {
                 throw new Error('Session ID is undefined');
@@ -53,7 +60,7 @@ const CamStudyPage = () => {
             console.log('Create token response:', data);
             return data;
         };
-    
+
         try {
             console.log('Attempting to create session with ID:', mySessionId);
             const sessionId = await createSession(mySessionId);
@@ -70,13 +77,16 @@ const CamStudyPage = () => {
     const joinSession = async () => {
         try {
             const token = await getToken(studyId);
-            
+
             let newSession = OV.current.initSession();
             setSession(newSession);
 
             newSession.on('streamCreated', (event) => {
-                const subscriber = newSession.subscribe(event.stream, undefined);
-                setSubscribers(prev => [...prev, subscriber]);
+                // 자신의 스트림은 구독하지 않음
+                if (event.stream.connection.connectionId !== newSession.connection.connectionId) {
+                    const subscriber = newSession.subscribe(event.stream, undefined);
+                    setSubscribers(prev => [...prev, subscriber]);
+                }
             });
 
             newSession.on('streamDestroyed', (event) => {
@@ -116,36 +126,71 @@ const CamStudyPage = () => {
 
     const toggleVideo = () => {
         if (publisher) {
-            publisher.publishVideo(!publisher.stream.videoActive);
+            publisher.publishVideo(!isVideoOn);
+            setIsVideoOn(!isVideoOn);
         }
     };
 
     const toggleAudio = () => {
         if (publisher) {
-            publisher.publishAudio(!publisher.stream.audioActive);
+            publisher.publishAudio(!isAudioOn);
+            setIsAudioOn(!isAudioOn);
+        }
+    };
+
+    const parseClientData = (connectionData) => {
+        try {
+            const parsedData = JSON.parse(connectionData);
+            return parsedData.clientData || 'Unknown';
+        } catch (error) {
+            console.error('Error parsing client data:', error);
+            return 'Unknown';
         }
     };
 
     return (
-            <div>
-                <h1>Video Session</h1>
-                <div id="video-container">
-                    {publisher && (
-                        <div className="stream-container">
-                            <UserVideoComponent streamManager={publisher} />
-                        </div>
-                    )}
-                    {subscribers.map((sub, i) => (
-                        <div key={i} className="stream-container">
-                            <UserVideoComponent streamManager={sub} />
-                        </div>
-                    ))}
-                </div>
-                <button onClick={leaveSession}>Leave Session</button>
-                <button onClick={toggleVideo}>Toggle Video</button>
-                <button onClick={toggleAudio}>Toggle Audio</button>
-                {error && <p style={{color: 'red'}}>{error}</p>}
+        <div>
+            <div id="video-container">
+                {publisher && (
+                    <div className="stream-container">
+                        <UserVideoComponent streamManager={publisher} />
+                        <div className="stream-name">{user.nickname} (나)</div>
+                    </div>
+                )}
+                {subscribers.map((sub, i) => (
+                    <div key={i} className="stream-container">
+                        <UserVideoComponent streamManager={sub} />
+                        <div className="stream-name">{parseClientData(sub.stream.connection.data)}</div>
+                    </div>
+                ))}
             </div>
+            <div className='video-controls'>
+                <button onClick={leaveSession} className="control-button"><CiLogout /> 나가기</button>
+                <button onClick={toggleVideo} className={`control-button ${isVideoOn ? '' : 'active'}`}>
+                    {isVideoOn ? (
+                        <>
+                            <IoVideocamOff /> 비디오 끄기
+                        </>
+                    ) : (
+                        <>
+                            <IoVideocam /> 비디오 켜기
+                        </>
+                    )}
+                </button>
+                <button onClick={toggleAudio} className={`control-button ${isAudioOn ? '' : 'active'}`}>
+                    {isAudioOn ? (
+                        <>
+                            <MdMicOff /> 오디오 끄기
+                        </>
+                    ) : (
+                        <>
+                            <MdMic /> 오디오 켜기
+                        </>
+                    )}
+                </button>
+            </div>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+        </div>
     );
 };
 
@@ -159,7 +204,9 @@ const UserVideoComponent = ({ streamManager }) => {
     }, [streamManager]);
 
     return (
-        <video autoPlay={true} ref={videoRef} />
+        <div className="video-wrapper">
+            <video autoPlay={true} ref={videoRef} />
+        </div>
     );
 };
 
