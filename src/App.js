@@ -4,7 +4,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import "./App.css";
 import Layout from "./component/Layout";
 import MainPage from "./pages/MainPage";
-import PostViewPage from "./pages/PostViewPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import StudyRoomPage from "./pages/StudyRoomPage";
@@ -23,7 +22,6 @@ function App() {
                     <Route path="mypage" element={<MyPage />} />
                     <Route path="study/:studyId" element={<StudyRoomPage />} />
                     <Route path="study/:studyId/camstudy" element={<CamStudyPage />} />
-                    <Route path="post/:boardId" element={<PostViewPage />} />
                 </Route>
                 <Route path="/*" element={<NotFoundPage />} />
             </Routes>

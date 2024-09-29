@@ -1,8 +1,6 @@
-// PostList.jsx
 import React from 'react';
-import { Link } from 'react-router-dom';
 
-function PostList({ posts, onCreatePost }) {
+function PostList({ posts, onCreatePost, onPostClick }) {
   return (
     <div style={styles.container}>
       <button className="custom-btn" onClick={onCreatePost}>+</button> 새 게시물을 작성하세요
@@ -10,13 +8,13 @@ function PostList({ posts, onCreatePost }) {
         {posts.length > 0 ? (
           <ul>
             {posts.map((post) => (
-              <li key={post.boardId} style={styles.postItem}>
-                <Link to={`/post/${post.boardId}`}>
+              <li key={post.id} style={styles.postItem}>
+                <div onClick={() => onPostClick(post)} style={styles.postLink}>
                   <h3>{post.title}</h3>
-                </Link>
-                <h5>{post.content}</h5>
-                <p>작성자: {post.nickname || "알 수 없음"}</p>
-                <p>작성일: {new Date(post.createDate).toLocaleString()}</p>
+                  <h5>{post.content}</h5>
+                  <p>작성자: {post.nickname || "알 수 없음"}</p>
+                  <p>작성일: {post.createDate}</p>
+                </div>
               </li>
             ))}
           </ul>
@@ -41,6 +39,11 @@ const styles = {
     marginBottom: "10px",
     borderBottom: "1px solid #8BC9FF",
     paddingBottom: "10px"
+  },
+  postLink: {
+    cursor: 'pointer',
+    textDecoration: 'none',
+    color: 'inherit'
   }
 };
 

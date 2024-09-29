@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from '../store/hooks.ts';
-import { updateMyStudyGroup } from '../store/myStudyGroupsSlice.ts';
+import { updateMyStudyGroup, removeMyStudyGroup } from '../store/myStudyGroupsSlice.ts';
 import StudyInfo from '../component/StudyRoomPage/StudyInfo';
 import PostList from '../component/StudyRoomPage/PostList.jsx';
 import MemberList from '../component/StudyRoomPage/MemberList.jsx';
 import CreatePostModal from '../component/StudyRoomPage/CreatePostModal';
 import StudyUpdateModal from "../component/StudyRoomPage/StudyUpdateModal.jsx";
+import PostViewModal from "../component/StudyRoomPage/PostViewModal.jsx";
 
 function StudyRoomPage() {
   const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
@@ -20,6 +21,8 @@ function StudyRoomPage() {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isMemberListOpen, setIsMemberListOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [isPostViewModalOpen, setIsPostViewModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -87,14 +90,27 @@ function StudyRoomPage() {
 
   const handleStudyOut = () => {
     if (window.confirm("정말로 스터디에서 탈퇴하시겠습니까?")) {
-      fetch(`/studies/${studyId}/members/${user.memberId}`, { method: 'DELETE' })
+      fetch(`/studies/${studyId}`, { method: 'DELETE' })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to leave study');
+          }
+          return response.text();
+        })
+        .then(text => {
+          if (text) {
+            return JSON.parse(text);
+          }
+        })
         .then(() => {
+          // Redux 상태 업데이트
+          dispatch(removeMyStudyGroup(Number(studyId)));
           alert("스터디에서 탈퇴하였습니다.");
           navigate("/");
         })
         .catch(error => {
           console.error("Failed to leave study:", error);
-          alert("탈퇴에 실패했습니다.");
+          alert("탈퇴에 실패했습니다. 다시 시도해주세요.");
         });
     }
   };
@@ -119,6 +135,16 @@ function StudyRoomPage() {
     }
   };
 
+  const handlePostClick = (post) => {
+    setSelectedPost(post);
+    setIsPostViewModalOpen(true);
+  };
+
+  const handleClosePostViewModal = () => {
+    setIsPostViewModalOpen(false);
+    setSelectedPost(null);
+  };
+
   if (!studyRoom) return <div>Loading...</div>;
 
   return (
@@ -135,6 +161,7 @@ function StudyRoomPage() {
       <PostList
         posts={posts}
         onCreatePost={() => setIsPostModalOpen(true)}
+        onPostClick={handlePostClick}
       />
       {isMemberListOpen && (
         <MemberList
@@ -154,6 +181,14 @@ function StudyRoomPage() {
           onHide={() => setIsUpdateModalOpen(false)}
           onSubmit={handleStudyUpdate}
           studyRoom={studyRoom}
+        />
+      )}
+      {isPostViewModalOpen && (
+        <PostViewModal
+          studyId={studyId}
+          post={selectedPost}
+          onClose={handleClosePostViewModal}
+          onPostUpdated={fetchPosts}
         />
       )}
       <style>{`

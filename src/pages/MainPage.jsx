@@ -109,7 +109,7 @@ function MainPage() {
                 dispatch(addMyStudyGroup({
                     studyId: selectedStudy.studyId,
                     studyName: selectedStudy.studyName,
-                    description: selectedStudy.discription,
+                    description: selectedStudy.description,
                     emoji: selectedStudy.emoji
                 }));
                 navigate(`/study/${selectedStudy.studyId}`);

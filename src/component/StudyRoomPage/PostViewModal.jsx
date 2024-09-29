@@ -1,52 +1,39 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useAppSelector } from '../store/hooks.ts'; // 현재 로그인한 사용자 정보를 가져오기 위함
+import React, { useState, useEffect } from "react";
+import { useAppSelector } from '../../store/hooks.ts';
 
-function PostViewPage() {
-  const { boardId } = useParams();
-  const [post, setPost] = useState(null);
-  const [editedTitle, setEditedTitle] = useState("");
-  const [editedContent, setEditedContent] = useState("");
-  const [comments, setComments] = useState([]);  // 댓글 상태
-  const [newComment, setNewComment] = useState("");  // 새 댓글 입력 상태
-  const [editingCommentId, setEditingCommentId] = useState(null);  // 수정 중인 댓글 ID 상태
-  const [editedCommentContent, setEditedCommentContent] = useState("");  // 수정 중인 댓글 내용 상태
-  const [isEditingPost, setIsEditingPost] = useState(false);  // 게시물 수정 모드
-  const navigate = useNavigate();
+function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
+  const [editedTitle, setEditedTitle] = useState(post.title);
+  const [editedContent, setEditedContent] = useState(post.content);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editedCommentContent, setEditedCommentContent] = useState("");
+  const [isEditingPost, setIsEditingPost] = useState(false);
   const user = useAppSelector((state) => state.user);
 
   useEffect(() => {
-    // 게시물 정보를 가져오는 API 호출
-    fetch(`/boards/${boardId}`)
-      .then(response => response.json())
-      .then(data => {
-        setPost(data);
-        setEditedTitle(data.title);
-        setEditedContent(data.content);
-      })
-      .catch(error => console.error("게시물 정보를 불러오는데 실패했습니다.", error));
+    fetchComments();
+  }, [post.id]);
 
-    // 댓글 리스트를 가져오는 API 호출
-    fetch(`/comments/board/${boardId}`)
+  const fetchComments = () => {
+    fetch(`/comments/board/${post.id}`)
       .then(response => response.json())
       .then(data => setComments(Array.isArray(data) ? data : []))
       .catch(error => {
         console.error("댓글 정보를 불러오는데 실패했습니다.", error);
-        setComments([]);  // 오류 발생 시 빈 배열로 설정
+        setComments([]);
       });
-  }, [boardId]);
+  };
 
-  // 게시물 수정 함수
   const handleEditSubmit = () => {
     if (window.confirm("정말로 게시물을 수정하시겠습니까?")) {
       const updatedPost = {
-        ...post,
         title: editedTitle,
-        content: editedContent,
-        memberId: user.memberId,
+        content: editedContent
       };
+      console.log("updatePost", updatedPost);
 
-      fetch(`http://localhost:8080/boards/${boardId}?currentMemberId=${user.memberId}`, {
+      fetch(`/studies/${studyId}/boards/${post.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedPost)
@@ -56,8 +43,8 @@ function PostViewPage() {
           return response.json();
         })
         .then(data => {
-          setPost(data);
-          setIsEditingPost(false);  // 게시물 수정 모드 종료
+          setIsEditingPost(false);
+          onPostUpdated();
           alert("게시물이 성공적으로 수정되었습니다.");
         })
         .catch(error => {
@@ -67,20 +54,15 @@ function PostViewPage() {
     }
   };
 
-  // 게시물 수정 모드로 전환
-  const toggleEditPost = () => {
-    setIsEditingPost(!isEditingPost);
-  };
-
-  // 게시물 삭제 함수
   const handleDelete = () => {
     if (window.confirm("정말로 게시물을 삭제하시겠습니까?")) {
-      fetch(`/boards/${boardId}`, {
+      fetch(`/studies/${studyId}/boards/${post.id}`, {
         method: 'DELETE',
       })
         .then(response => {
           if (!response.ok) throw new Error("게시물 삭제에 실패했습니다.");
-          navigate(`/study/${post.studyId}`);
+          onClose();
+          onPostUpdated();
           alert("게시물이 성공적으로 삭제되었습니다.");
         })
         .catch(error => {
@@ -90,7 +72,6 @@ function PostViewPage() {
     }
   };
 
-  // 새 댓글 추가 함수
   const handleAddComment = () => {
     if (!newComment.trim()) {
       alert("댓글 내용을 입력하세요.");
@@ -98,9 +79,9 @@ function PostViewPage() {
     }
 
     const commentData = {
-      boardId: boardId,
+      boardId: post.id,
       content: newComment,
-      memberId: user.memberId,  // 로그인된 사용자 ID 사용
+      memberId: user.memberId,
       nickname: user.nickname
     };
 
@@ -113,8 +94,8 @@ function PostViewPage() {
     })
       .then(response => response.json())
       .then(data => {
-        setComments([...comments, data]);  // 새 댓글 추가
-        setNewComment("");  // 입력 필드 초기화
+        setComments([...comments, data]);
+        setNewComment("");
       })
       .catch(error => {
         console.error("댓글 추가에 실패했습니다.", error);
@@ -122,15 +103,12 @@ function PostViewPage() {
       });
   };
 
-  // 댓글 수정 모드로 전환
   const handleEditComment = (commentId, content) => {
-    setEditingCommentId(commentId);  // 수정할 댓글 ID 설정
-    setEditedCommentContent(content);  // 기존 댓글 내용을 수정 필드에 세팅
+    setEditingCommentId(commentId);
+    setEditedCommentContent(content);
   };
 
-  // 댓글 수정 저장 함수
   const handleSaveEditedComment = (commentId) => {
-    // 서버에 수정된 댓글을 전송하는 로직
     fetch(`/comments/${commentId}`, {
       method: 'PUT',
       headers: {
@@ -140,18 +118,15 @@ function PostViewPage() {
     })
       .then(response => response.json())
       .then(updatedComment => {
-        // 댓글 리스트에서 해당 댓글을 업데이트
         setComments(comments.map(comment => 
           comment.commentId === commentId ? updatedComment : comment
         ));
-        // 수정 모드 종료
         setEditingCommentId(null);
         setEditedCommentContent("");
       })
       .catch(error => console.error("댓글 수정에 실패했습니다.", error));
   };
 
-  // 댓글 삭제 함수
   const handleDeleteComment = (commentId) => {
     if (window.confirm("정말로 댓글을 삭제하시겠습니까?")) {
       fetch(`/comments/${commentId}`, {
@@ -167,90 +142,59 @@ function PostViewPage() {
     }
   };
 
-  if (!post) return <div>Loading...</div>;
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", padding: "20px", maxWidth: "1200px", margin: "0 auto", position: "relative", height: "90vh", overflow: "hidden" }}>
-      <div style={{ 
-        flex: "1", 
-        border: "1px solid #8BC9FF",  
-        padding: "20px", 
-        borderRadius: "20px", 
-        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", 
-        position: "relative",
-        overflowY: "auto",  // 스크롤이 필요할 때 스크롤바 생성
-        height: "100%", 
-        overflowX: "hidden" 
-      }}>
-        {/* 뒤로 버튼 */}
-        <button 
-          onClick={() => navigate(-1)} 
-          className="custom-btn back-btn"
-          style={{ 
-            position: "absolute", 
-            top: "20px", 
-            left: "20px", 
-            zIndex: 1
-          }}  
-        >
-          뒤로
-        </button>
-
-        {/* 게시물 수정 및 삭제 버튼 */}
+    <div style={styles.modalOverlay}>
+      <div style={styles.modalContent}>
+        <button onClick={onClose} style={styles.closeButton}>X</button>
+        
         {user.memberId === post.memberId && (
-          <div style={{ position: "absolute", top: "20px", right: "20px" }}>
-            <button onClick={toggleEditPost} className="custom-btn" style={{ marginRight: "10px" }}>
+          <div style={styles.editDeleteButtons}>
+            <button onClick={() => setIsEditingPost(!isEditingPost)} className="custom-btn">
               {isEditingPost ? "수정 취소" : "수정"}
             </button>
-            <button onClick={handleDelete} className="custom-btn">
-              삭제
-            </button>
+            <button onClick={handleDelete} className="custom-btn">삭제</button>
           </div>
         )}
 
-        {/* 게시물 제목 및 내용 */}
         {isEditingPost ? (
           <>
             <input
               type="text"
               value={editedTitle}
               onChange={(e) => setEditedTitle(e.target.value)}
-              style={{ width: "100%", padding: "10px", marginTop: "60px", marginBottom: "10px", borderRadius: "10px", border: "1px solid #8BC9FF" }}
+              style={styles.input}
               placeholder="제목을 입력하세요"
             />
             <textarea
               value={editedContent}
               onChange={(e) => setEditedContent(e.target.value)}
-              style={{ width: "100%", height: "200px", padding: "10px", marginBottom: "10px", borderRadius: "10px", border: "1px solid #8BC9FF" }}
+              style={styles.textarea}
               placeholder="내용을 입력하세요"
             />
-            <button onClick={handleEditSubmit} className="custom-btn">
-              저장
-            </button>
+            <button onClick={handleEditSubmit} className="custom-btn">저장</button>
           </>
         ) : (
           <>
-            <h1 style={{ marginTop: "60px" }}>{post.title}</h1>
-            <p>{post.content}</p>
+            <h1>{post.title}</h1>
             <p>작성자: {post.nickname}</p>
-            <p>작성일: {new Date(post.createDate).toLocaleString()}</p>
+            <p>작성일: {post.createDate}</p>
+            <p>{post.content}</p>
           </>
         )}
 
-        <hr style={{ borderTop: "1px solid #8BC9FF", margin: "20px 0" }} />
+        <hr style={styles.hr} />
 
-        {/* 댓글 리스트 */}
         <h3>댓글</h3>
         {comments.length > 0 ? (
-          <ul>
+          <ul style={styles.commentList}>
             {comments.map(comment => (
-              <li key={comment.commentId} style={{ marginBottom: "20px" }}>
+              <li key={comment.commentId} style={styles.commentItem}>
                 {editingCommentId === comment.commentId ? (
                   <>
                     <textarea
                       value={editedCommentContent}
                       onChange={(e) => setEditedCommentContent(e.target.value)}
-                      style={{ width: "100%", height: "80px", marginBottom: "10px" }}
+                      style={styles.textarea}
                     />
                     <button onClick={() => handleSaveEditedComment(comment.commentId)} className="custom-btn">
                       저장
@@ -262,27 +206,25 @@ function PostViewPage() {
                 ) : (
                   <>
                     <p>{comment.content}</p>
-                    <div style={{ fontSize: "12px", color: "gray" }}>
+                    <div style={styles.commentInfo}>
                       <p>작성자: {comment.nickname || "알 수 없음"}</p>
                       <p>작성일: {new Date(comment.createdDate).toLocaleString()}</p>
                     </div>
                     {(user.memberId === post.memberId || user.memberId === comment.memberId) && (
-                      <>
+                      <div style={styles.commentButtons}>
                         <button 
                           onClick={() => handleEditComment(comment.commentId, comment.content)} 
                           className="custom-btn"
-                          style={{ marginTop: "10px" }}
                         >
                           수정
                         </button>
                         <button 
                           onClick={() => handleDeleteComment(comment.commentId)} 
                           className="custom-btn"
-                          style={{ marginTop: "10px" }}
                         >
                           삭제
                         </button>
-                      </>
+                      </div>
                     )}
                   </>
                 )}
@@ -290,50 +232,97 @@ function PostViewPage() {
             ))}
           </ul>
         ) : (
-          <p>댓글이 없습니다.</p>
+          <p>작성된 댓글이 없습니다.</p>
         )}
 
-        {/* 새 댓글 입력 */}
         <textarea
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="댓글을 입력하세요"
-          style={{ width: "100%", padding: "10px", marginBottom: "10px", borderRadius: "10px", border: "1px solid #8BC9FF" }}
+          style={styles.textarea}
         />
         <button onClick={handleAddComment} className="custom-btn">댓글 달기</button>
       </div>
-
-      {/* 스크롤바 스타일 */}
-      <style>
-      {`
-        ::-webkit-scrollbar {
-          width: 10px;
-          border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-          background-color: #8BC9FF;
-          border-radius: 10px;
-        }
-        ::-webkit-scrollbar-track {
-          background-color: #f5f5f5;
-        }
-        .custom-btn {
-          padding: 5px 10px;
-          border: 1px solid #8BC9FF;
-          background-color: white;
-          color: black;
-          border-radius: 5px;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-        }
-        .custom-btn:hover {
-          background-color: #8BC9FF;
-          color: white;
-        }
-      `}
-      </style>
     </div>
   );
 }
 
-export default PostViewPage;
+const styles = {
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: '20px',
+    borderRadius: '10px',
+    width: '80%',
+    maxWidth: '800px',
+    maxHeight: '90vh',
+    overflowY: 'auto',
+    position: 'relative',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: '10px',
+    right: '10px',
+    background: 'none',
+    border: 'none',
+    fontSize: '20px',
+    cursor: 'pointer',
+  },
+  editDeleteButtons: {
+    position: 'absolute',
+    top: '10px',
+    right: '40px',
+    display: 'flex',
+    gap: '10px',
+  },
+  input: {
+    width: '100%',
+    padding: '10px',
+    marginBottom: '10px',
+    borderRadius: '5px',
+    border: '1px solid #8BC9FF',
+  },
+  textarea: {
+    width: '100%',
+    padding: '10px',
+    marginBottom: '10px',
+    borderRadius: '5px',
+    border: '1px solid #8BC9FF',
+    minHeight: '100px',
+  },
+  hr: {
+    borderTop: '1px solid #8BC9FF',
+    margin: '20px 0',
+  },
+  commentList: {
+    listStyle: 'none',
+    padding: 0,
+  },
+  commentItem: {
+    marginBottom: '20px',
+    borderBottom: '1px solid #e0e0e0',
+    paddingBottom: '10px',
+  },
+  commentInfo: {
+    fontSize: '12px',
+    color: 'gray',
+  },
+  commentButtons: {
+    marginTop: '10px',
+    display: 'flex',
+    gap: '10px',
+  },
+};
+
+export default PostViewModal;
