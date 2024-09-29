@@ -69,7 +69,7 @@ function RegisterForm() {
                     showConfirmButton: false,
                     timer: 1200
                 })
-                navigate('/');
+                navigate('/login');
             } else {
                 const errorData = await response.json();
                 Swal.fire({

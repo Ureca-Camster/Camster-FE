@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format, addMonths, subMonths, isToday, isSameMonth } from 'date-fns';
 import './MonthlyTracker.css';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../../store/hooks.ts';
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
@@ -9,7 +9,7 @@ const monthNames = [
 ];
 
 const MonthlyTracker = ({ memberId }) => {
-  const user = useSelector((state) => state.user);
+  const user = useAppSelector((state) => state.user);
 
   const currentDate = new Date();
   const [year, setYear] = useState(currentDate.getFullYear());
