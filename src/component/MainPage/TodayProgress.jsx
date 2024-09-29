@@ -51,7 +51,7 @@ const ProgressBar = styled.div`
 const Progress = styled.div`
     width: ${(props) => props.width}%;
     height: 35px;
-    border-right: ${(props) => props.width < 100 ? '2px solid black' : 'none'};
+    border-right: ${(props) => props.width < 100 && props.width > 0 ? '2px solid black' : 'none'};
     background: ${(props) =>
         props.isLoggedIn ? "#46A9FF" : "linear-gradient(90deg, #46A9FF 0%, #ffffff 90%)"};
 `;

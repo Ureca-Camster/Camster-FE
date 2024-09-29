@@ -7,15 +7,32 @@
   border: 6px solid #8BC9FF;
   border-radius: 50px;
   justify-content: start;
-  min-height: 222px;
-  /* StudyCard의 height(180px) + 위아래 padding(18px * 2) */
+  min-height: 207px;
+  max-width: 1176px; /* Maximum width for 3 cards + gaps */
+  margin: 0; /* Center the list */
+}
+
+.study-card {
+  flex: 0 0 100%; /* Full width on small screens */
+  max-width: 360px; /* Maximum width of a single card */
+}
+
+@media (min-width: 768px) {
+  .study-card {
+    flex: 0 0 calc(50% - 9px); /* Two cards per row on medium screens */
+  }
+}
+
+@media (min-width: 1140px) {
+  .study-card {
+    flex: 0 0 calc(33.333% - 12px); /* Three cards per row on large screens */
+  }
 }
 
 .login-div {
   padding-top: 40px;
   justify-content: center;
-  height: 222px;
-  /* StudyCard의 height(180px) + 위아래 padding(18px * 2) */
+  height: 207px;
   align-items: center;
   display: flex;
 }
@@ -26,8 +43,7 @@
 
 .empty-study-list {
   width: 100%;
-  height: 180px;
-  /* StudyCard의 height와 동일 */
+  height: 160px;
   display: flex;
   justify-content: center;
   align-items: center;

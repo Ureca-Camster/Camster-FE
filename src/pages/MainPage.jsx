@@ -194,7 +194,7 @@ function MainPage() {
                 </Col>
             </Row>
             <Row>
-                <div className="app-container mb-5">
+                <Col className="app-container mb-5">
                     <div className="title-button-container">
                         <h1 className="app-title">내 스터디 목록👀</h1>
                         {isLoggedIn && (
@@ -220,7 +220,7 @@ function MainPage() {
                             </p>
                         </div>
                     )}
-                </div>
+                </Col>
             </Row>
             <Row>
                 <div className="app-container">
