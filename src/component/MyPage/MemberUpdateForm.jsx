@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setUser } from '../store/userSlice.ts';
+import { setUser } from '../../store/userSlice.ts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
-import './Input.css';
+import '../Input.css';
 import Swal from 'sweetalert2';
 
 function MemberUpdateForm() {
@@ -11,7 +11,8 @@ function MemberUpdateForm() {
     const user = useSelector((state) => state.user);
 
     const [nickname, setNickname] = useState('');
-    const [goalTime, setGoalTime] = useState('');
+    const [goalHours, setGoalHours] = useState('');
+    const [goalMinutes, setGoalMinutes] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordMatchMessage, setPasswordMatchMessage] = useState('');
@@ -24,7 +25,10 @@ function MemberUpdateForm() {
     useEffect(() => {
         if (user) {
             setNickname(user.nickname);
-            setGoalTime(user.goalTime);
+            // Convert seconds to hours and minutes
+            const totalMinutes = Math.floor(user.goalTime / 60);
+            setGoalHours(Math.floor(totalMinutes / 60).toString());
+            setGoalMinutes((totalMinutes % 60).toString());
         }
     }, [user]);
 
@@ -39,19 +43,22 @@ function MemberUpdateForm() {
             }
         } else {
             setPasswordMatchMessage('');
-            setIsFormValid(false);
+            setIsFormValid(true);  // Form is valid even without password change
         }
     }, [newPassword, confirmPassword]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (isFormValid) {
+            // Convert hours and minutes to seconds
+            const goalTimeInSeconds = (parseInt(goalHours) * 3600) + (parseInt(goalMinutes) * 60);
+
             dispatch(
                 setUser({
                     memberId: user.memberId,
                     nickname: nickname,
                     email: user.email,
-                    goalTime: goalTime,
+                    goalTime: goalTimeInSeconds,
                     todayTime: user.todayTime
                 })
             );
@@ -65,7 +72,7 @@ function MemberUpdateForm() {
                     body: JSON.stringify({
                         nickname: nickname,
                         memberPassword: newPassword,
-                        goalTime: goalTime
+                        goalTime: goalTimeInSeconds
                     }),
                 });
 
@@ -81,7 +88,7 @@ function MemberUpdateForm() {
                     })
                 }
             } catch (error) {
-                console.error('Error creating study:', error);
+                console.error('Error updating member:', error);
                 Swal.fire({
                     text: '업데이트 중 오류가 발생했습니다.',
                     icon: "error",
@@ -120,12 +127,28 @@ function MemberUpdateForm() {
                 </div>
                 <div className="input-wrapper">
                     <label>목표 학습 시간</label><br />
-                    <input
-                        type='number'
-                        value={goalTime}
-                        onChange={(e) => setGoalTime(e.target.value)}
-                        required
-                    />
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <input
+                            type='number'
+                            value={goalHours}
+                            onChange={(e) => setGoalHours(e.target.value)}
+                            min="0"
+                            max="23"
+                            style={{ width: '50px', marginRight: '5px' }}
+                            required
+                        />
+                        <span>시간</span>
+                        <input
+                            type='number'
+                            value={goalMinutes}
+                            onChange={(e) => setGoalMinutes(e.target.value)}
+                            min="0"
+                            max="59"
+                            style={{ width: '50px', marginLeft: '10px', marginRight: '5px' }}
+                            required
+                        />
+                        <span>분</span>
+                    </div>
                 </div>
                 <div className="input-wrapper">
                     <label>비밀번호 수정</label><br />
@@ -134,7 +157,6 @@ function MemberUpdateForm() {
                             type={showNewPassword ? 'text' : 'password'}
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            required
                         />
                         <FontAwesomeIcon 
                             icon={faEye}

@@ -3,13 +3,13 @@ import { Button, Col, Container, Row } from 'react-bootstrap';
 import { useAppSelector, useAppDispatch } from '../store/hooks.ts';
 import { addMyStudyGroup, resetMyStudyGroups, setMyStudyGroups  } from '../store/myStudyGroupsSlice.ts';
 import { useNavigate } from 'react-router-dom';
-import Rank from '../component/Rank';
-import TodayProgress from '../component/TodayProgress';
-import StudyList from '../component/StudyList';
-import StudyJoinModal from '../component/StudyJoinModal';
-import StudyCreateModal from '../component/StudyCreateModal';
 import './MainPage.css'
 import Swal from 'sweetalert2';
+import TodayProgress from '../component/MainPage/TodayProgress.jsx';
+import Rank from '../component/MainPage/Rank.jsx';
+import StudyList from '../component/MainPage/StudyList.jsx';
+import StudyJoinModal from '../component/MainPage/StudyJoinModal.jsx';
+import StudyCreateModal from '../component/MainPage/StudyCreateModal.jsx';
 
 function MainPage() {
     const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
@@ -93,13 +93,15 @@ function MainPage() {
     };
 
     const handleJoinStudy = async (password) => {
+        const joinRequestBody = { studyPassword: password };
+        console.log("joinRequestBody", joinRequestBody);
         try {
             const response = await fetch(`/studies/${selectedStudy.studyId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ studyPassword: password }),
+                body: JSON.stringify(joinRequestBody),
             });
 
             if (response.ok) {
@@ -107,7 +109,7 @@ function MainPage() {
                 dispatch(addMyStudyGroup({
                     studyId: selectedStudy.studyId,
                     studyName: selectedStudy.studyName,
-                    description: selectedStudy.discription,
+                    description: selectedStudy.description,
                     emoji: selectedStudy.emoji
                 }));
                 navigate(`/study/${selectedStudy.studyId}`);
@@ -136,7 +138,7 @@ function MainPage() {
 
     const handleCreateStudy = async (studyData) => {
         try {
-            const response = await fetch('/studies', {
+            fetch('/studies', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -148,10 +150,16 @@ function MainPage() {
                     isPublic: studyData.isPublic,
                     studyPassword: studyData.studyPassword
                 }),
-            });
-
-            if (response.ok) {
-                const { studyId } = await response.json();
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to create study');
+                }
+                return response.json();
+            })
+            .then(responseData => {
+                console.log("Response data:", responseData);
+                const studyId = responseData;
                 dispatch(addMyStudyGroup({
                     studyId: studyId,
                     studyName: studyData.studyName,
@@ -159,9 +167,11 @@ function MainPage() {
                     emoji: studyData.emoji
                 }));
                 navigate(`/study/${studyId}`);
-            } else {
-                throw new Error('Failed to create study');
-            }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // 여기에 에러 처리 로직을 추가할 수 있습니다.
+            });
         } catch (error) {
             console.error('Error creating study:', error);
             Swal.fire({
@@ -184,7 +194,7 @@ function MainPage() {
                 </Col>
             </Row>
             <Row>
-                <div className="app-container mb-5">
+                <Col className="app-container mb-5">
                     <div className="title-button-container">
                         <h1 className="app-title">내 스터디 목록👀</h1>
                         {isLoggedIn && (
@@ -210,7 +220,7 @@ function MainPage() {
                             </p>
                         </div>
                     )}
-                </div>
+                </Col>
             </Row>
             <Row>
                 <div className="app-container">
@@ -222,7 +232,7 @@ function MainPage() {
                     />
                 </div>
             </Row>
-            <StudyJoinModal 
+            <StudyJoinModal
                 show={showJoinModal}
                 onHide={() => setShowJoinModal(false)}
                 onJoin={handleJoinStudy}

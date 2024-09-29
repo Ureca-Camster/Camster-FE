@@ -2,8 +2,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import MemberUpdateForm from '../component/MemberUpdateForm';
-import MonthlyTracker from '../component/MonthlyTracker';
+import MemberUpdateForm from '../component/MyPage/MemberUpdateForm';
+import MonthlyTracker from '../component/MyPage/MonthlyTracker';
 import { Col, Container, Row } from 'react-bootstrap';
 
 function MyPage() {

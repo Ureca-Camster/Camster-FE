@@ -14,17 +14,6 @@ function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
-    function handleLoginTest() {
-        dispatch(login());
-        dispatch(setUser({
-            nickname: '홍길동', 
-            email: 'hong@ureca.com',
-            goalTime: 10000,
-            todayTime: 8000,
-        }));
-        navigate("/");
-    }
-
     const loginUser = async (email, memberPassword) => {
         try {
             const response = await fetch('/auth/login', {
@@ -71,13 +60,14 @@ function LoginForm() {
 
     return (
         <div className='login-form'>
-            <form onSubmit={handleLoginTest}>
+            <form onSubmit={handleLogin}>
                 <div className="input-wrapper">
                     <label>이메일</label><br />
                     <input
                         type='email'
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        required
                     />
                 </div>
                 <div className="input-wrapper">
@@ -87,6 +77,7 @@ function LoginForm() {
                             type={showPassword ? 'text' : 'password'}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            required
                         />
                         <FontAwesomeIcon 
                             icon={faEye}

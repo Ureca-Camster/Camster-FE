@@ -4,7 +4,6 @@ import storage from 'redux-persist/lib/storage/session'; // Use sessionStorage
 import { combineReducers } from 'redux';
 import loginReducer from './loginSlice.ts';
 import userReducer from './userSlice.ts';
-import rankReducer from './rankSlice.ts';
 import myStudyGroupsReducer from './myStudyGroupsSlice.ts';
 
 const persistConfig = {
@@ -15,7 +14,6 @@ const persistConfig = {
 const rootReducer = combineReducers({
     login: loginReducer,
     user: userReducer,
-    rank: rankReducer,
     myStudyGroups: myStudyGroupsReducer,
 });
 

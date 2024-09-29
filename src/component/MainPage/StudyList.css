@@ -1,0 +1,53 @@
+.study-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 18px;
+  background-color: white;
+  border: 6px solid #8BC9FF;
+  border-radius: 50px;
+  justify-content: start;
+  min-height: 207px;
+  max-width: 1176px; /* Maximum width for 3 cards + gaps */
+  margin: 0; /* Center the list */
+}
+
+.study-card {
+  flex: 0 0 100%; /* Full width on small screens */
+  max-width: 360px; /* Maximum width of a single card */
+}
+
+@media (min-width: 768px) {
+  .study-card {
+    flex: 0 0 calc(50% - 9px); /* Two cards per row on medium screens */
+  }
+}
+
+@media (min-width: 1140px) {
+  .study-card {
+    flex: 0 0 calc(33.333% - 12px); /* Three cards per row on large screens */
+  }
+}
+
+.login-div {
+  padding-top: 40px;
+  justify-content: center;
+  height: 207px;
+  align-items: center;
+  display: flex;
+}
+
+.app-title {
+  font-size: 35px;
+}
+
+.empty-study-list {
+  width: 100%;
+  height: 160px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 25px;
+  color: #888;
+  padding-top: 10px;
+}

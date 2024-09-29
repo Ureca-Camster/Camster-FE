@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format, addMonths, subMonths, isToday, isSameMonth } from 'date-fns';
 import './MonthlyTracker.css';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../../store/hooks.ts';
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
@@ -9,7 +9,7 @@ const monthNames = [
 ];
 
 const MonthlyTracker = ({ memberId }) => {
-  const user = useSelector((state) => state.user);
+  const user = useAppSelector((state) => state.user);
 
   const currentDate = new Date();
   const [year, setYear] = useState(currentDate.getFullYear());
@@ -21,28 +21,24 @@ const MonthlyTracker = ({ memberId }) => {
   const isCurrentMonth = isSameMonth(new Date(year, month - 1), currentDate);
 
   useEffect(() => {
-    // fetchData();
-    setRecordList([
-      {
-        "date":"2024-09-08",
-        "time": 10530
-      },
-      {
-        "date":"2024-09-09",
-        "time": 8022
-      },
-      {
-        "date":"2024-09-13",
-        "time": 8096
-      }
-    ]);
+    fetchData();
   }, [memberId, year, month]);
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`/api/records?memberId=${memberId}&year=${year}&month=${month}`);
+      const response = await fetch(`/records?year=${year}&month=${month}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      
       const data = await response.json();
-      setRecordList(data.recordList);
+      setRecordList(data);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -88,10 +84,21 @@ const MonthlyTracker = ({ memberId }) => {
     }
     for (let day = 1; day <= daysInMonth; day++) {
       const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      const record = recordList.find(r => r.date === date);
-      const hasData = record && record.time > 0;
       const isCurrentDay = isToday(new Date(date));
-      const percentage = hasData ? Math.min(100, Math.round((record.time / user.goalTime) * 100)) : 0;
+      let record;
+      let hasData;
+      let time;
+
+      if (isCurrentDay) {
+        time = user.todayTime;
+        hasData = time > 0;
+      } else {
+        record = recordList.find(r => r.date === date);
+        time = record ? record.time : 0;
+        hasData = time > 0;
+      }
+
+      const percentage = hasData ? Math.min(100, Math.round((time / user.goalTime) * 100)) : 0;
 
       let backgroundColor;
       if (hasData) {
@@ -112,7 +119,7 @@ const MonthlyTracker = ({ memberId }) => {
             backgroundColor: hoveredDate === date ? hoverColor : backgroundColor,
             cursor: hasData || isCurrentDay ? 'pointer' : 'default'
           }}
-          onClick={() => handleDateClick(date, record)}
+          onClick={() => handleDateClick(date, { time })}
           onMouseEnter={() => handleDateHover(date, hasData || isCurrentDay)}
           onMouseLeave={() => setHoveredDate(null)}
         >
@@ -122,6 +129,28 @@ const MonthlyTracker = ({ memberId }) => {
     }
 
     return calendarDays;
+  };
+
+  const getSelectedDateInfo = () => {
+    const isSelectedToday = isToday(new Date(selectedDate));
+    let time;
+
+    if (isSelectedToday) {
+      time = user.todayTime;
+    } else {
+      const record = recordList.find(r => r.date === selectedDate);
+      time = record ? record.time : 0;
+    }
+
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
+    const seconds = time % 60;
+    const percentage = time > 0 ? Math.min(100, Math.round((time / user.goalTime) * 100)) : 0;
+
+    return {
+      timeFormatted: `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`,
+      percentage
+    };
   };
 
   return (
@@ -143,24 +172,8 @@ const MonthlyTracker = ({ memberId }) => {
       {selectedDate && (
         <div className="selected-date-info">
           <span>{selectedDate}</span>
-          <span style={{letterSpacing:'1px'}}>{
-            (() => {
-              const record = recordList.find(r => r.date === selectedDate);
-              const seconds = record ? record.time : 0;
-              const hours = Math.floor(seconds / 3600);
-              const minutes = Math.floor((seconds % 3600) / 60);
-              const remainingSeconds = seconds % 60;
-              return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-            })()
-          }</span>
-          <span style={{letterSpacing:'1px'}}>{
-            (() => {
-              const record = recordList.find(r => r.date === selectedDate);
-              return record && record.time > 0
-                ? Math.min(100, Math.round((record.time / user.goalTime) * 100))
-                : 0;
-            })()
-          } %</span>
+          <span style={{letterSpacing:'1px'}}>{getSelectedDateInfo().timeFormatted}</span>
+          <span style={{letterSpacing:'1px'}}>{getSelectedDateInfo().percentage} %</span>
         </div>
       )}
     </div>

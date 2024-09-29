@@ -19,7 +19,7 @@ const StudyCreateModal = ({ show, onHide, onSubmit }) => {
       setEmojiError(true);
       return;
     }
-    onSubmit({ studyName, description, emoji, isPublic, password: isPublic ? '' : password });
+    onSubmit({ studyName, description, emoji, isPublic, studyPassword: isPublic ? '' : password });
     resetForm();
   };
 

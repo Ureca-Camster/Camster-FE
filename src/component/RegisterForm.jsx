@@ -3,12 +3,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import './Input.css';
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2/src/sweetalert2.js'
+import Swal from 'sweetalert2'
 
 function RegisterForm() {
     const [email, setEmail] = useState('');
     const [nickname, setNickname] = useState('');
-    const [goalTime, setGoalTime] = useState('');
+    const [goalHours, setGoalHours] = useState('');
+    const [goalMinutes, setGoalMinutes] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordMatchMessage, setPasswordMatchMessage] = useState('');
@@ -42,11 +43,14 @@ function RegisterForm() {
             return;
         }
 
+        // 시간과 분을 초로 변환
+        const goalTimeInSeconds = (parseInt(goalHours) * 3600) + (parseInt(goalMinutes) * 60);
+
         const userData = {
             nickname,
             email,
             memberPassword: password,
-            goalTime: goalTime
+            goalTime: goalTimeInSeconds
         };
 
         try {
@@ -65,8 +69,7 @@ function RegisterForm() {
                     showConfirmButton: false,
                     timer: 1200
                 })
-                alert('');
-                navigate('/');
+                navigate('/login');
             } else {
                 const errorData = await response.json();
                 Swal.fire({
@@ -120,12 +123,28 @@ function RegisterForm() {
                 </div>
                 <div className="input-wrapper">
                     <label>목표 학습 시간</label><br />
-                    <input
-                        type='number'
-                        value={goalTime}
-                        onChange={(e) => setGoalTime(e.target.value)}
-                        required
-                    />
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <input
+                            type='number'
+                            value={goalHours}
+                            onChange={(e) => setGoalHours(e.target.value)}
+                            min="0"
+                            max="23"
+                            style={{ width: '50px', marginRight: '5px' }}
+                            required
+                        />
+                        <span>시간</span>
+                        <input
+                            type='number'
+                            value={goalMinutes}
+                            onChange={(e) => setGoalMinutes(e.target.value)}
+                            min="0"
+                            max="59"
+                            style={{ width: '50px', marginLeft: '10px', marginRight: '5px' }}
+                            required
+                        />
+                        <span>분</span>
+                    </div>
                 </div>
                 <div className="input-wrapper">
                     <label>비밀번호</label><br />
