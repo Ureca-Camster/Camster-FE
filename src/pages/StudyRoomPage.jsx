@@ -19,8 +19,6 @@ function StudyRoomPage() {
   const [editedDescription, setEditedDescription] = useState("");
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isMemberListOpen, setIsMemberListOpen] = useState(false);
-  const [members, setMembers] = useState([]);
-  const [memberCount, setMemberCount] = useState(0);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -29,7 +27,6 @@ function StudyRoomPage() {
     }
 
     fetchStudyRoom();
-    fetchMembers();
     fetchPosts();
   }, [studyId, isLoggedIn, navigate, user.memberId]);
 
@@ -46,22 +43,8 @@ function StudyRoomPage() {
       .catch(error => console.error("Failed to fetch study room:", error));
   };
 
-  const fetchMembers = () => {
-    fetch(`/studies/${studyId}/members`)
-      .then(response => response.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setMemberCount(data.length);
-          setMembers(data);
-        } else {
-          console.error("Invalid data format:", data);
-        }
-      })
-      .catch(error => console.error("Failed to fetch members:", error));
-  };
-
   const fetchPosts = () => {
-    fetch(`/boards/study/${studyId}`)
+    fetch(`/studies/${studyId}/boards`)
       .then(response => response.json())
       .then(data => setPosts(data))
       .catch(error => console.error("Failed to fetch posts:", error));
@@ -96,8 +79,6 @@ function StudyRoomPage() {
     if (window.confirm("정말로 스터디에서 탈퇴하시겠습니까?")) {
       fetch(`/studies/${studyId}/members/${user.memberId}`, { method: 'DELETE' })
         .then(() => {
-          setMemberCount(prevCount => prevCount - 1);
-          setMembers(prevMembers => prevMembers.filter(member => member.memberId !== user.memberId));
           alert("스터디에서 탈퇴하였습니다.");
           navigate("/");
         })
@@ -112,12 +93,9 @@ function StudyRoomPage() {
     if (window.confirm("등록 하시겠습니까?")) {
       const newPost = {
         title: postTitle,
-        content: postContent,
-        memberId: user.memberId,
-        nickname: user.nickname,
-        studyId: studyId,
+        content: postContent
       };
-      fetch('/boards', {
+      fetch(`/studies/${studyId}/boards`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newPost)
@@ -137,12 +115,12 @@ function StudyRoomPage() {
     <div style={styles.container}>
       <StudyInfo
         studyRoom={studyRoom}
-        memberCount={memberCount}
+        memberCount={studyRoom.members.length}
         onEditClick={() => setIsEditModalOpen(true)}
         onMemberListClick={() => setIsMemberListOpen(true)}
         onCamStudyClick={handleCamStudy}
         onLeaveClick={handleStudyOut}
-        isCreator={user.memberId === studyRoom.memberId}
+        isCreator={user.memberId === studyRoom.leaderId}
       />
       <PostList
         posts={posts}
@@ -150,7 +128,7 @@ function StudyRoomPage() {
       />
       {isMemberListOpen && (
         <MemberList
-          members={members}
+          members={studyRoom.members}
           onClose={() => setIsMemberListOpen(false)}
         />
       )}
@@ -162,8 +140,6 @@ function StudyRoomPage() {
       )}
       {isEditModalOpen && (
         <EditDescriptionModal
-          description={editedDescription}
-          onDescriptionChange={setEditedDescription}
           onSave={handleDescriptionUpdate}
           onClose={() => setIsEditModalOpen(false)}
         />
