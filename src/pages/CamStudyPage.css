@@ -44,10 +44,19 @@ video {
     align-items: center;
     gap: 5px;
     font-size: 14px;
+    transition: background-color 0.3s ease;
 }
 
 .control-button:hover {
     background-color: rgba(0, 0, 0, 0.7);
+}
+
+.control-button.active {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.control-button.active:hover {
+    background-color: rgba(0, 0, 0, 0.9);
 }
 
 .control-button svg {

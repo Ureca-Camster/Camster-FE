@@ -67,6 +67,7 @@ function LoginForm() {
                         type='email'
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        required
                     />
                 </div>
                 <div className="input-wrapper">
@@ -76,6 +77,7 @@ function LoginForm() {
                             type={showPassword ? 'text' : 'password'}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            required
                         />
                         <FontAwesomeIcon 
                             icon={faEye}

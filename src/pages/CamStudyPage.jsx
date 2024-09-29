@@ -44,7 +44,7 @@ const CamStudyPage = () => {
             console.log('Create session response:', data);
             return data.sessionId || data.id || sessionId;
         };
-    
+
         const createToken = async (sessionId) => {
             if (!sessionId) {
                 throw new Error('Session ID is undefined');
@@ -60,7 +60,7 @@ const CamStudyPage = () => {
             console.log('Create token response:', data);
             return data;
         };
-    
+
         try {
             console.log('Attempting to create session with ID:', mySessionId);
             const sessionId = await createSession(mySessionId);
@@ -77,7 +77,7 @@ const CamStudyPage = () => {
     const joinSession = async () => {
         try {
             const token = await getToken(studyId);
-            
+
             let newSession = OV.current.initSession();
             setSession(newSession);
 
@@ -150,7 +150,6 @@ const CamStudyPage = () => {
 
     return (
         <div>
-            <h1>Video Session</h1>
             <div id="video-container">
                 {publisher && (
                     <div className="stream-container">
@@ -166,31 +165,31 @@ const CamStudyPage = () => {
                 ))}
             </div>
             <div className='video-controls'>
-            <button onClick={leaveSession} className="control-button"><CiLogout /> 나가기</button>
-            <button onClick={toggleVideo} className="control-button">
-                {isVideoOn ? (
-                <>
-                    <IoVideocamOff /> 비디오 끄기
-                </>
-                ) : (
-                <>
-                    <IoVideocam /> 비디오 켜기
-                </>
-                )}
-            </button>
-            <button onClick={toggleAudio} className="control-button">
-                {isAudioOn ? (
-                <>
-                    <MdMicOff /> 오디오 끄기
-                </>
-                ) : (
-                <>
-                    <MdMic /> 오디오 켜기
-                </>
-                )}
-            </button>
+                <button onClick={leaveSession} className="control-button"><CiLogout /> 나가기</button>
+                <button onClick={toggleVideo} className={`control-button ${isVideoOn ? '' : 'active'}`}>
+                    {isVideoOn ? (
+                        <>
+                            <IoVideocamOff /> 비디오 끄기
+                        </>
+                    ) : (
+                        <>
+                            <IoVideocam /> 비디오 켜기
+                        </>
+                    )}
+                </button>
+                <button onClick={toggleAudio} className={`control-button ${isAudioOn ? '' : 'active'}`}>
+                    {isAudioOn ? (
+                        <>
+                            <MdMicOff /> 오디오 끄기
+                        </>
+                    ) : (
+                        <>
+                            <MdMic /> 오디오 켜기
+                        </>
+                    )}
+                </button>
             </div>
-            {error && <p style={{color: 'red'}}>{error}</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
     );
 };
