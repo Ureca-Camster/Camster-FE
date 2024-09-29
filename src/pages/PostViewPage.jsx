@@ -17,7 +17,7 @@ function PostViewPage() {
 
   useEffect(() => {
     // 게시물 정보를 가져오는 API 호출
-    fetch(`http://localhost:8080/boards/${boardId}`)
+    fetch(`/boards/${boardId}`)
       .then(response => response.json())
       .then(data => {
         setPost(data);
@@ -27,7 +27,7 @@ function PostViewPage() {
       .catch(error => console.error("게시물 정보를 불러오는데 실패했습니다.", error));
 
     // 댓글 리스트를 가져오는 API 호출
-    fetch(`http://localhost:8080/comments/board/${boardId}`)
+    fetch(`/comments/board/${boardId}`)
       .then(response => response.json())
       .then(data => setComments(Array.isArray(data) ? data : []))
       .catch(error => {
@@ -75,7 +75,7 @@ function PostViewPage() {
   // 게시물 삭제 함수
   const handleDelete = () => {
     if (window.confirm("정말로 게시물을 삭제하시겠습니까?")) {
-      fetch(`http://localhost:8080/boards/${boardId}?currentMemberId=${user.memberId}`, {
+      fetch(`/boards/${boardId}`, {
         method: 'DELETE',
       })
         .then(response => {
@@ -104,7 +104,7 @@ function PostViewPage() {
       nickname: user.nickname
     };
 
-    fetch(`http://localhost:8080/comments`, {
+    fetch('/comments', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -131,7 +131,7 @@ function PostViewPage() {
   // 댓글 수정 저장 함수
   const handleSaveEditedComment = (commentId) => {
     // 서버에 수정된 댓글을 전송하는 로직
-    fetch(`http://localhost:8080/comments/${commentId}`, {
+    fetch(`/comments/${commentId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -154,7 +154,7 @@ function PostViewPage() {
   // 댓글 삭제 함수
   const handleDeleteComment = (commentId) => {
     if (window.confirm("정말로 댓글을 삭제하시겠습니까?")) {
-      fetch(`http://localhost:8080/comments/${commentId}`, {
+      fetch(`/comments/${commentId}`, {
         method: "DELETE",
       })
         .then(() => {

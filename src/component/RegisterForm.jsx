@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import './Input.css';
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2/src/sweetalert2.js'
+import Swal from 'sweetalert2'
 
 function RegisterForm() {
     const [email, setEmail] = useState('');
@@ -65,7 +65,6 @@ function RegisterForm() {
                     showConfirmButton: false,
                     timer: 1200
                 })
-                alert('');
                 navigate('/');
             } else {
                 const errorData = await response.json();
