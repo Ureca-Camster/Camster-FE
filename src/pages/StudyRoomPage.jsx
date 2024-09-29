@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAppSelector } from '../store/hooks.ts';
+import { useAppDispatch, useAppSelector } from '../store/hooks.ts';
+import { updateMyStudyGroup } from '../store/myStudyGroupsSlice.ts';
 import StudyInfo from '../component/StudyRoomPage/StudyInfo';
 import PostList from '../component/StudyRoomPage/PostList.jsx';
 import MemberList from '../component/StudyRoomPage/MemberList.jsx';
 import CreatePostModal from '../component/StudyRoomPage/CreatePostModal';
-import EditDescriptionModal from '../component/StudyRoomPage/EditDescriptionModal';
+import StudyUpdateModal from "../component/StudyRoomPage/StudyUpdateModal.jsx";
 
 function StudyRoomPage() {
   const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
   const user = useAppSelector((state) => state.user);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { studyId } = useParams();
   
   const [studyRoom, setStudyRoom] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editedDescription, setEditedDescription] = useState("");
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isMemberListOpen, setIsMemberListOpen] = useState(false);
 
@@ -38,7 +39,6 @@ function StudyRoomPage() {
       })
       .then(data => {
         setStudyRoom(data);
-        setEditedDescription(data.description);
       })
       .catch(error => console.error("Failed to fetch study room:", error));
   };
@@ -50,27 +50,37 @@ function StudyRoomPage() {
       .catch(error => console.error("Failed to fetch posts:", error));
   };
 
-  const handleDescriptionUpdate = () => {
+  const handleStudyUpdate = (updatedStudy) => {
     if (window.confirm("정말로 수정하시겠습니까?")) {
-      const updatedStudyRoom = { ...studyRoom, description: editedDescription };
-      fetch(`/studies/${studyId}?loggedInMemberId=${user.memberId}`, {
+      fetch(`/studies/${studyId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedStudyRoom)
+        body: JSON.stringify(updatedStudy),
       })
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to update study room data');
+          return fetch(`/studies/${studyId}`);  // 업데이트 후 최신 데이터를 다시 가져옵니다.
+        })
         .then(response => response.json())
         .then(data => {
           setStudyRoom(data);
-          setIsEditModalOpen(false);
+          // Redux 상태 업데이트
+          dispatch(updateMyStudyGroup({
+            studyId: data.studyId,
+            studyName: data.studyName,
+            description: data.description,
+            emoji: data.emoji
+          }));
+          setIsUpdateModalOpen(false);
           alert("수정이 완료되었습니다.");
         })
         .catch(error => {
-          console.error("Failed to update description:", error);
+          console.error("Failed to update study:", error);
           alert("수정에 실패했습니다.");
         });
     }
   };
-
+  
   const handleCamStudy = () => {
     window.open(`/study/${studyId}/camstudy`, '_blank');
   };
@@ -116,7 +126,7 @@ function StudyRoomPage() {
       <StudyInfo
         studyRoom={studyRoom}
         memberCount={studyRoom.members.length}
-        onEditClick={() => setIsEditModalOpen(true)}
+        onEditClick={() => setIsUpdateModalOpen(true)}
         onMemberListClick={() => setIsMemberListOpen(true)}
         onCamStudyClick={handleCamStudy}
         onLeaveClick={handleStudyOut}
@@ -138,10 +148,12 @@ function StudyRoomPage() {
           onClose={() => setIsPostModalOpen(false)}
         />
       )}
-      {isEditModalOpen && (
-        <EditDescriptionModal
-          onSave={handleDescriptionUpdate}
-          onClose={() => setIsEditModalOpen(false)}
+      {isUpdateModalOpen && (
+        <StudyUpdateModal
+          show={isUpdateModalOpen}
+          onHide={() => setIsUpdateModalOpen(false)}
+          onSubmit={handleStudyUpdate}
+          studyRoom={studyRoom}
         />
       )}
       <style>{`
