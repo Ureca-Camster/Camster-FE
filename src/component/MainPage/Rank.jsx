@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setRanks } from '../store/rankSlice.ts';
+import { setRanks } from '../../store/rankSlice.ts';
 import { ListGroup } from 'react-bootstrap';
 
 const formatTime = (seconds) => {

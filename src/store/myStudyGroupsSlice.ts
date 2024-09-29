@@ -12,26 +12,7 @@ interface MyStudyGroupsState {
 }
 
 const initialState: MyStudyGroupsState = {
-    myStudyGroups: [
-        {
-          studyId: 100,
-          studyName: "Java 알고리즘 스터디",
-          description: "소개가 엄청나게 길어지면 어떻게 될까요? 저도 궁금해서 지금 테스트를 해보려고 합니다. 결과가 궁금합니다. 곧 월즈가 시작하는데 떨려서 죽겠습니다 아 맞다 장패드 포카 교환해야 하는데!",
-          emoji: "✨"
-        },
-        {
-          studyId: 200,
-          studyName: "Python 알고리즘 스터디",
-          description: "뭐 어쩌구 저쩌구 소개",
-          emoji: "🐧"
-        },
-        {
-          studyId: 220,
-          studyName: "Figma 도전",
-          description: "뭐 어쩌구 저쩌구 소개",
-          emoji: "🔥"
-        }
-    ],
+    myStudyGroups: [],
 };
 
 const myStudyGroupsSlice = createSlice({
