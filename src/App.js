@@ -7,9 +7,9 @@ import MainPage from "./pages/MainPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import StudyRoomPage from "./pages/StudyRoomPage";
-import CamStudyPage from "./pages/CamStudyPage";
 import MyPage from "./pages/MyPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import OpenViduComponent from "./pages/OpenViduComponent";
 
 function App() {
     return (
@@ -21,7 +21,7 @@ function App() {
                     <Route path="register" element={<RegisterPage />} />
                     <Route path="mypage" element={<MyPage />} />
                     <Route path="study/:studyId" element={<StudyRoomPage />} />
-                    <Route path="study/:studyId/camstudy" element={<CamStudyPage />} />
+                    <Route path="study/:studyId/camstudy" element={<OpenViduComponent />} />
                 </Route>
                 <Route path="/*" element={<NotFoundPage />} />
             </Routes>
