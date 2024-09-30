@@ -50,7 +50,7 @@
 }
 
 .member-info {
-    margin-top: 15px;
+    margin-top: 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -91,7 +91,7 @@ button {
 }
 
 .action-buttons {
-    margin-top: 15px;
+    margin-top: 20px;
     display: flex;
     gap: 10px;
     justify-content: space-between;

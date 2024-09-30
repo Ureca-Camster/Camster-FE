@@ -9,7 +9,7 @@ import MemberList from '../component/StudyRoomPage/MemberList.jsx';
 import CreatePostModal from '../component/StudyRoomPage/CreatePostModal';
 import StudyUpdateModal from "../component/StudyRoomPage/StudyUpdateModal.jsx";
 import PostViewModal from "../component/StudyRoomPage/PostViewModal.jsx";
-import { Container, Col } from "react-bootstrap";
+import { Container, Col, Row } from "react-bootstrap";
 
 function StudyRoomPage() {
   const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
@@ -208,24 +208,26 @@ function StudyRoomPage() {
 
   return (
     <Container style={styles.container}>
-      <Col>
-      <StudyInfo
-        studyRoom={studyRoom}
-        memberCount={studyRoom.members.length}
-        onEditClick={() => setIsUpdateModalOpen(true)}
-        onMemberListClick={() => setIsMemberListOpen(true)}
-        onCamStudyClick={handleCamStudy}
-        onLeaveClick={handleStudyOut}
-        isLeader={user.memberId === studyRoom.leaderId}
-      />
-      </Col>
-      <Col>
-      <PostList
-        posts={posts}
-        onCreatePost={() => setIsPostModalOpen(true)}
-        onPostClick={handlePostClick}
-      />
-      </Col>
+      <Row>
+        <Col>
+          <StudyInfo
+            studyRoom={studyRoom}
+            memberCount={studyRoom.members.length}
+            onEditClick={() => setIsUpdateModalOpen(true)}
+            onMemberListClick={() => setIsMemberListOpen(true)}
+            onCamStudyClick={handleCamStudy}
+            onLeaveClick={handleStudyOut}
+            isLeader={user.memberId === studyRoom.leaderId}
+          />
+        </Col>
+        <Col>
+          <PostList
+            posts={posts}
+            onCreatePost={() => setIsPostModalOpen(true)}
+            onPostClick={handlePostClick}
+          />
+        </Col>
+      </Row>
       {isMemberListOpen && (
         <MemberList
           members={studyRoom.members}

@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import EmojiPicker from 'emoji-picker-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye } from '@fortawesome/free-solid-svg-icons';
 import './StudyCreateModal.css';
 
 const StudyCreateModal = ({ show, onHide, onSubmit }) => {
@@ -9,6 +11,7 @@ const StudyCreateModal = ({ show, onHide, onSubmit }) => {
   const [emoji, setEmoji] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojiError, setEmojiError] = useState(false);
   const emojiPickerRef = useRef(null);
@@ -42,6 +45,17 @@ const StudyCreateModal = ({ show, onHide, onSubmit }) => {
     setShowEmojiPicker(false);
     setEmojiError(false);
   };
+
+  const handlePublicToggle = (e) => {
+    const newIsPublic = e.target.checked;
+    setIsPublic(newIsPublic);
+    if (newIsPublic) {
+      setPassword('');
+    }
+  };
+
+  const handleMouseDown = () => setShowPassword(true);
+  const handleMouseUp = () => setShowPassword(false);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -113,22 +127,31 @@ const StudyCreateModal = ({ show, onHide, onSubmit }) => {
                 type="switch"
                 id="public-switch"
                 checked={isPublic}
-                onChange={(e) => setIsPublic(e.target.checked)}
+                onChange={handlePublicToggle}  
                 className="custom-switch"
               />
               <span className="toggle-label">{isPublic ? "공개 스터디" : "비공개 스터디"}</span>
             </div>
           </Form.Group>
-
           <Form.Group className="mb-3">
-            <Form.Control
-              type="password"
-              placeholder={isPublic ? "공개 스터디는 비밀번호가 필요하지 않습니다" : "비공개 스터디 비밀번호 입력"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isPublic}
-              required={!isPublic}
-            />
+            <div className="password-input-wrapper">
+              <Form.Control
+                type={showPassword ? "text" : "password"}
+                placeholder={isPublic ? "공개 스터디는 비밀번호가 필요하지 않습니다" : "비공개 스터디 비밀번호 입력"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isPublic}
+                required={!isPublic}
+              />
+              {!isPublic &&
+              <FontAwesomeIcon 
+                icon={faEye}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                className="password-toggle"
+              />}
+            </div>
           </Form.Group>
           <div className="d-flex justify-content-end">
             <Button variant="primary" type="submit">
