@@ -4,10 +4,12 @@ import { useAppSelector } from '../store/hooks.ts';
 import { CiLogout } from "react-icons/ci";
 import { IoVideocam, IoVideocamOff } from "react-icons/io5";
 import { MdMic, MdMicOff } from "react-icons/md";
-
+import { useParams } from 'react-router-dom';
 import './OpenViduComponent.css'
+import StopWatch from '../component/StopWatch.jsx';
 
-const OpenViduComponent = ( {studyId} ) => {
+const OpenViduComponent = () => {
+    const { studyId } = useParams();
     const user = useAppSelector((state) => state.user);
 
     const [session, setSession] = useState(null);
@@ -149,6 +151,7 @@ const OpenViduComponent = ( {studyId} ) => {
 
     return (
         <div>
+            <StopWatch />
             <div id="video-container">
                 {publisher && (
                     <div className="stream-container">
