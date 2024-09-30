@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../../store/userSlice.ts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
+import { useAppDispatch, useAppSelector } from '../../store/hooks.ts';
 import '../Input.css';
 import Swal from 'sweetalert2';
 
 function MemberUpdateForm() {
-    const dispatch = useDispatch();
-    const user = useSelector((state) => state.user);
+    const dispatch = useAppDispatch();
+    const user = useAppSelector((state) => state.user);
 
     const [nickname, setNickname] = useState('');
     const [goalHours, setGoalHours] = useState('');

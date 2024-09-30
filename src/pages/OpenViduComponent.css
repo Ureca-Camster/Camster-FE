@@ -44,7 +44,7 @@ video {
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 20px;
+    gap: 10px;
     z-index: 10;
 }
 
@@ -57,7 +57,7 @@ video {
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 3px;
     font-size: 18px;
     transition: background-color 0.3s ease;
 }

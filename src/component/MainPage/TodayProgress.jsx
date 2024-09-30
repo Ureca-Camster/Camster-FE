@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
-import styled, { createGlobalStyle } from "styled-components";
+import styled from "styled-components";
 import WebFont from 'webfontloader';
+import { useAppSelector } from "../../store/hooks.ts";
 
 const formatTime = (seconds) => {
     const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
@@ -83,11 +83,25 @@ const PercentageText = styled.span`
 `;
 
 function TodayProgress() {
-    const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
-    const user = useSelector((state) => state.user);
+    const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
+    const user = useAppSelector((state) => state.user);
     const [currentDate, setCurrentDate] = useState('');
     const [fontLoaded, setFontLoaded] = useState(false);
     const dateTextRef = useRef(null);
+    const [todayTime, setTodayTime] = useState(null);
+
+    const fetchTodayTime = async () => {
+        try {
+          const response = await fetch('/members/time');
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const data = await response.json();
+          setTodayTime(data);
+        } catch (error) {
+          console.error('Error fetching today time:', error);
+        }
+    };
 
     useEffect(() => {
         WebFont.load({
@@ -99,6 +113,7 @@ function TodayProgress() {
     }, []);
 
     useEffect(() => {
+        fetchTodayTime();
         const now = new Date();
         const year = now.getFullYear().toString().slice(-2);
         const month = (now.getMonth() + 1).toString().padStart(2, '0');
@@ -107,7 +122,6 @@ function TodayProgress() {
         setCurrentDate(`${year}-${month}-${day} ${dayOfWeek}`);
     }, []);
 
-    const todayTime = user.todayTime;
     const goalTime = user.goalTime;
 
     const progressWidth = isLoggedIn

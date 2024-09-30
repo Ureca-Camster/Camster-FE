@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { OpenVidu } from 'openvidu-browser';
-import { useAppSelector } from '../store/hooks.ts';
+import { useAppSelector, useAppDispatch } from '../store/hooks.ts';
+import { setUser } from '../store/userSlice.ts';
 import { CiLogout } from "react-icons/ci";
 import { IoVideocam, IoVideocamOff } from "react-icons/io5";
 import { MdMic, MdMicOff } from "react-icons/md";
@@ -11,6 +12,8 @@ import StopWatch from '../component/StopWatch.jsx';
 const OpenViduComponent = () => {
     const { studyId } = useParams();
     const user = useAppSelector((state) => state.user);
+    const [time, setTime] = useState(0);
+    const dispatch = useAppDispatch();
 
     const [session, setSession] = useState(null);
     const [publisher, setPublisher] = useState(null);
@@ -116,13 +119,27 @@ const OpenViduComponent = () => {
     };
 
     const leaveSession = () => {
-        if (session) {
-            session.disconnect();
-        }
-        setSession(null);
-        setPublisher(null);
-        setSubscribers([]);
-        window.close();
+        fetch('/members/updateTodayTime', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(time)
+        })
+        .then(()=>{
+            if (session) {
+                session.disconnect();
+            }
+            setSession(null);
+            setPublisher(null);
+            setSubscribers([]);
+    
+            window.close();
+        })
+        .catch(error => {
+            console.error('Error updating time:', error);
+            alert(time)
+        });
     };
 
     const toggleVideo = () => {
@@ -151,7 +168,7 @@ const OpenViduComponent = () => {
 
     return (
         <div>
-            <StopWatch />
+            <StopWatch time={time} setTime={setTime}/>
             <div id="video-container">
                 {publisher && (
                     <div className="stream-container">
