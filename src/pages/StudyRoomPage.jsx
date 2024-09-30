@@ -204,6 +204,16 @@ function StudyRoomPage() {
     setSelectedPost(null);
   };
 
+  const handlePostUpdated = (updatedPost) => {
+    setPosts(prevPosts => 
+      prevPosts.map(post => 
+        post.id === updatedPost.id ? updatedPost : post
+      )
+    );
+    setSelectedPost(updatedPost);
+  };
+
+
   if (!studyRoom) return <div>Loading...</div>;
 
   return (
@@ -255,7 +265,7 @@ function StudyRoomPage() {
           studyId={studyId}
           post={selectedPost}
           onClose={handleClosePostViewModal}
-          onPostUpdated={fetchPosts}
+          onPostUpdated={handlePostUpdated}
         />
       )}
     </>
