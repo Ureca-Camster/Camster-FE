@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from '../store/hooks.ts';
 import { updateMyStudyGroup, removeMyStudyGroup } from '../store/myStudyGroupsSlice.ts';
+import Swal from 'sweetalert2';
 import StudyInfo from '../component/StudyRoomPage/StudyInfo';
 import PostList from '../component/StudyRoomPage/PostList.jsx';
 import MemberList from '../component/StudyRoomPage/MemberList.jsx';
@@ -54,85 +55,143 @@ function StudyRoomPage() {
   };
 
   const handleStudyUpdate = (updatedStudy) => {
-    if (window.confirm("정말로 수정하시겠습니까?")) {
-      fetch(`/studies/${studyId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedStudy),
+    fetch(`/studies/${studyId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedStudy),
+    })
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to update study room data');
+        return fetch(`/studies/${studyId}`);
       })
-        .then(response => {
-          if (!response.ok) throw new Error('Failed to update study room data');
-          return fetch(`/studies/${studyId}`);  // 업데이트 후 최신 데이터를 다시 가져옵니다.
-        })
-        .then(response => response.json())
-        .then(data => {
-          setStudyRoom(data);
-          // Redux 상태 업데이트
-          dispatch(updateMyStudyGroup({
-            studyId: data.studyId,
-            studyName: data.studyName,
-            description: data.description,
-            emoji: data.emoji
-          }));
-          setIsUpdateModalOpen(false);
-          alert("수정이 완료되었습니다.");
-        })
-        .catch(error => {
-          console.error("Failed to update study:", error);
-          alert("수정에 실패했습니다.");
+      .then(response => response.json())
+      .then(data => {
+        setStudyRoom(data);
+        dispatch(updateMyStudyGroup({
+          studyId: data.studyId,
+          studyName: data.studyName,
+          description: data.description,
+          emoji: data.emoji
+        }));
+        setIsUpdateModalOpen(false);
+        Swal.fire({
+          icon: 'success',
+          title: '수정 완료',
+          toast: true,
+          showConfirmButton: false,
+          timer: 1200
         });
-    }
+      })
+      .catch(error => {
+        console.error("Failed to update study:", error);
+        Swal.fire({
+          icon: 'error',
+          title: '수정 실패',
+          text: '다시 시도해 주세요',
+          toast: true,
+          showConfirmButton: false,
+          timer: 1200
+        });
+      });
   };
   
   const handleCamStudy = () => {
-    window.open(`/study/${studyId}/camstudy`, '_blank');
+    Swal.fire({
+      text: '새 창에서 캠 스터디를 시작하시겠습니까?',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '시작',
+      cancelButtonText: '취소'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.open(`/study/${studyId}/camstudy`, '_blank');
+      }
+    });
   };
 
   const handleStudyOut = () => {
-    if (window.confirm("정말로 스터디에서 탈퇴하시겠습니까?")) {
-      fetch(`/studies/${studyId}`, { method: 'DELETE' })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to leave study');
-          }
-          return response.text();
-        })
-        .then(text => {
-          if (text) {
-            return JSON.parse(text);
-          }
-        })
-        .then(() => {
-          // Redux 상태 업데이트
-          dispatch(removeMyStudyGroup(Number(studyId)));
-          alert("스터디에서 탈퇴하였습니다.");
-          navigate("/");
-        })
-        .catch(error => {
-          console.error("Failed to leave study:", error);
-          alert("탈퇴에 실패했습니다. 다시 시도해주세요.");
-        });
-    }
+    Swal.fire({
+      title: '스터디 탈퇴',
+      text: "스터디에서 탈퇴하시겠습니까?",
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '탈퇴',
+      cancelButtonText: '취소'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/studies/${studyId}`, { method: 'DELETE' })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to leave study');
+            }
+            return response.text();
+          })
+          .then(text => {
+            if (text) {
+              return JSON.parse(text);
+            }
+          })
+          .then(() => {
+            dispatch(removeMyStudyGroup(Number(studyId)));
+            Swal.fire({
+              icon: 'success',
+              title: '탈퇴 완료!',
+              toast: true,
+              showConfirmButton: false,
+              timer: 1200
+            });
+            navigate("/");
+          })
+          .catch(error => {
+            console.error("Failed to leave study:", error);
+            Swal.fire({
+              icon: 'error',
+              title: '탈퇴 오류',
+              text: '다시 시도해주세요.',
+              toast: true,
+              showConfirmButton: false,
+              timer: 1200
+            });
+          });
+      }
+    });
   };
 
   const handlePostSubmit = (postTitle, postContent) => {
-    if (window.confirm("등록 하시겠습니까?")) {
-      const newPost = {
-        title: postTitle,
-        content: postContent
-      };
-      fetch(`/studies/${studyId}/boards`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newPost)
-      })
-        .then(response => response.json())
-        .then(data => {
-          setPosts([...posts, data]);
-          setIsPostModalOpen(false);
-        })
-        .catch(error => console.error("Failed to submit post:", error));
-    }
+    const newPost = {
+      title: postTitle,
+      content: postContent
+    };
+    fetch(`/studies/${studyId}/boards`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newPost)
+    })
+    .then(response => response.json())
+    .then(data => {
+      setPosts([...posts, data]);
+      setIsPostModalOpen(false);
+      Swal.fire({
+        icon: 'success',
+        title: '게시물 등록 완료',
+        toast: true,
+        showConfirmButton: false,
+        timer: 1200
+      });
+    })
+    .catch(error => {
+      console.error("Failed to submit post:", error);
+      Swal.fire({
+        icon: 'error',
+        title: '게시물 등록 실패',
+        text: '다시 시도해 주세요',
+        toast: true,
+        showConfirmButton: false,
+        timer: 1200
+      });
+    });
   };
 
   const handlePostClick = (post) => {
