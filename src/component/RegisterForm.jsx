@@ -7,18 +7,35 @@ import Swal from 'sweetalert2'
 
 function RegisterForm() {
     const [email, setEmail] = useState('');
+    const [isEmailFormatValid, setIsEmailFormatValid] = useState(false);
     const [nickname, setNickname] = useState('');
-    const [goalHours, setGoalHours] = useState('');
-    const [goalMinutes, setGoalMinutes] = useState('');
+    const [goalHours, setGoalHours] = useState('5');
+    const [goalMinutes, setGoalMinutes] = useState('0');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordMatchMessage, setPasswordMatchMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isFormValid, setIsFormValid] = useState(false);
+    const [isEmailAvailable, setIsEmailAvailable] = useState(false);
+    const [emailValidMessage, setEmailValidMessage] = useState('');
     const navigate = useNavigate();
 
     const confirmPasswordRef = useRef(null);
+    const emailRef = useRef(null);
+
+    const validateEmailFormat = (email) => {
+        const re = /^.+@.+$/;
+        return re.test(String(email).toLowerCase());
+    };
+
+    useEffect(() => {
+        setIsEmailFormatValid(validateEmailFormat(email));
+        if (!validateEmailFormat(email)) {
+            setIsEmailAvailable(false);
+            setEmailValidMessage('');
+        }
+    }, [email]);
 
     useEffect(() => {
         if (password || confirmPassword) {
@@ -35,9 +52,52 @@ function RegisterForm() {
         }
     }, [password, confirmPassword]);
 
+    const handleEmailCheck = async () => {
+        if (email === '' || !isEmailFormatValid) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/members/check?email=${encodeURIComponent(email)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                const isDuplicated = await response.json();
+                setIsEmailAvailable(!isDuplicated);
+                setEmailValidMessage(!isDuplicated ? '사용 가능한 이메일입니다' : '이미 사용 중인 이메일입니다');
+            } else {
+                throw new Error('이메일 중복 확인 실패');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: "error",
+                title: "오류 발생",
+                text: "이메일 중복 확인 중 오류가 발생했습니다. 다시 시도해 주세요.",
+                showConfirmButton: false,
+                timer: 1200
+            });
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         
+        if (!isEmailAvailable) {
+            Swal.fire({
+                icon: "warning",
+                title: "이메일 중복확인을 완료하세요",
+                showConfirmButton: false,
+                timer: 1200
+            });
+            emailRef.current.focus();
+            return;
+        }
+
         if (!isFormValid) {
             confirmPasswordRef.current.focus();
             return;
@@ -114,12 +174,32 @@ function RegisterForm() {
                 </div>
                 <div className="input-wrapper">
                     <label>이메일</label><br />
-                    <input
-                        type='email'
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
+                    <div className="email-input-wrapper">
+                        <input
+                            type='email'
+                            value={email}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                setIsEmailAvailable(false);
+                                setEmailValidMessage('');
+                            }}
+                            ref={emailRef}
+                            required
+                        />
+                        <button 
+                            type="button" 
+                            onClick={handleEmailCheck} 
+                            className={`email-check-button ${isEmailFormatValid ? '' : 'disabled'}`}
+                            disabled={!isEmailFormatValid}
+                        >
+                            중복확인
+                        </button>
+                    </div>
+                    {emailValidMessage && (
+                        <div className={`email-valid-message ${isEmailAvailable ? 'valid' : 'invalid'}`}>
+                            {emailValidMessage}
+                        </div>
+                    )}
                 </div>
                 <div className="input-wrapper">
                     <label>목표 학습 시간</label><br />
@@ -182,11 +262,10 @@ function RegisterForm() {
                             className="password-toggle"
                         />
                     </div>
-                    <div className={
-                        `password-match-message ${password === confirmPassword ? 'match' : 'mismatch'}
-                        ${passwordMatchMessage === '' ? 'nonexist' : 'exist'}`}>
+                    {confirmPassword && <div className={
+                        `password-match-message ${password === confirmPassword ? 'match' : 'mismatch'}`}>
                         {passwordMatchMessage}
-                    </div>
+                    </div>}
                 </div>
                 <button 
                     className={'mybtn skyblue rounded'} 
