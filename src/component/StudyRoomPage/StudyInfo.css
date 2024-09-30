@@ -2,7 +2,7 @@
     position: relative;
     width: 100%;
     margin: 0 auto;
-    padding: 15px;
+    padding: 15px 20px;
     background-color: #f8f8f8;
     border-radius: 25px;
 }
@@ -10,12 +10,11 @@
 .study-info-header {
     display: flex;
     align-items: center;
-    margin-bottom: 5px;
+    margin: 10px 0;
 }
 
 .study-info-emoji {
-    font-size: 30px;
-    margin-right: 5px;
+    font-size: 50px;
 }
 
 .study-info-title-container {
@@ -25,9 +24,9 @@
 }
 
 .study-info-title {
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 800;
-    margin: 0 0 3px 0;
+    margin: 0 0 10px 0;
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -38,14 +37,13 @@
     position: relative;
     background-color: #F1F1F1;
     border-radius: 15px;
-    padding: 25px 20px 60px 20px;
+    padding: 30px 20px 50px 20px;
     overflow: hidden;
 }
 
 .study-info-description p {
     text-align: center;
     font-size: 18px;
-    margin: 0 0 -5px 0;
     line-height: 1.3em;
     overflow-wrap: break-word;
     word-wrap: break-word;
@@ -58,11 +56,13 @@
     justify-content: space-between;
     background-color: #F1F1F1;
     border-radius: 15px;
-    padding: 10px 22px;
+    padding: 10px 20px;
 }
 
 .member-info span {
-    margin: 0 10px;
+    margin: 0 5px 0 10px;
+    padding-top: 2px;
+    font-size: 18px;
 }
 
 button {
@@ -71,7 +71,7 @@ button {
 
 .edit-button {
     background-color: #E6E6E6;
-    padding: 5px 8px;
+    padding: 8px 13px;
     border-radius: 10px;
     position: absolute;
     bottom: 12px;
@@ -82,18 +82,18 @@ button {
 }
 
 .member-list-btn {
-    padding: 11px 15px 7px 15px;
+    padding: 13px 17px 9px 17px;
     background-color: #E6E6E6;
     border: none;
     border-radius: 10px;
     text-align: center;
-    margin-right: -3px;
+    margin-right: -7px;
 }
 
 .action-buttons {
     margin-top: 15px;
     display: flex;
-    gap: 15px;
+    gap: 10px;
     justify-content: space-between;
 }
 
