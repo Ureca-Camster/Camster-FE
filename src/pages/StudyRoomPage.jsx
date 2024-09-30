@@ -9,6 +9,7 @@ import MemberList from '../component/StudyRoomPage/MemberList.jsx';
 import CreatePostModal from '../component/StudyRoomPage/CreatePostModal';
 import StudyUpdateModal from "../component/StudyRoomPage/StudyUpdateModal.jsx";
 import PostViewModal from "../component/StudyRoomPage/PostViewModal.jsx";
+import { Container, Col } from "react-bootstrap";
 
 function StudyRoomPage() {
   const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
@@ -112,7 +113,6 @@ function StudyRoomPage() {
 
   const handleStudyOut = () => {
     Swal.fire({
-      title: '스터디 탈퇴',
       text: "스터디에서 탈퇴하시겠습니까?",
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -207,7 +207,8 @@ function StudyRoomPage() {
   if (!studyRoom) return <div>Loading...</div>;
 
   return (
-    <div style={styles.container}>
+    <Container style={styles.container}>
+      <Col>
       <StudyInfo
         studyRoom={studyRoom}
         memberCount={studyRoom.members.length}
@@ -215,13 +216,16 @@ function StudyRoomPage() {
         onMemberListClick={() => setIsMemberListOpen(true)}
         onCamStudyClick={handleCamStudy}
         onLeaveClick={handleStudyOut}
-        isCreator={user.memberId === studyRoom.leaderId}
+        isLeader={user.memberId === studyRoom.leaderId}
       />
+      </Col>
+      <Col>
       <PostList
         posts={posts}
         onCreatePost={() => setIsPostModalOpen(true)}
         onPostClick={handlePostClick}
       />
+      </Col>
       {isMemberListOpen && (
         <MemberList
           members={studyRoom.members}
@@ -276,7 +280,7 @@ function StudyRoomPage() {
           background-color: #f5f5f5;
         }
       `}</style>
-    </div>
+    </Container>
   );
 }
 

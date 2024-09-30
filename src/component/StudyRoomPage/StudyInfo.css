@@ -1,0 +1,120 @@
+.study-info-container {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-radius: 25px;
+}
+
+.study-info-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.study-info-emoji {
+    font-size: 30px;
+    margin-right: 5px;
+}
+
+.study-info-title-container {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.study-info-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0 0 3px 0;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.study-info-description {
+    position: relative;
+    background-color: #F1F1F1;
+    border-radius: 15px;
+    padding: 25px 20px 60px 20px;
+    overflow: hidden;
+}
+
+.study-info-description p {
+    text-align: center;
+    font-size: 18px;
+    margin: 0 0 -5px 0;
+    line-height: 1.3em;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.member-info {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #F1F1F1;
+    border-radius: 15px;
+    padding: 10px 22px;
+}
+
+.member-info span {
+    margin: 0 10px;
+}
+
+button {
+    font-size: 18px;
+}
+
+.edit-button {
+    background-color: #E6E6E6;
+    padding: 5px 8px;
+    border-radius: 10px;
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.member-list-btn {
+    padding: 11px 15px 7px 15px;
+    background-color: #E6E6E6;
+    border: none;
+    border-radius: 10px;
+    text-align: center;
+    margin-right: -3px;
+}
+
+.action-buttons {
+    margin-top: 15px;
+    display: flex;
+    gap: 15px;
+    justify-content: space-between;
+}
+
+.action-buttons button {
+    padding: 16px 15px 12px 15px;
+    border-radius: 15px;
+    border: none;    
+    color: white;
+    white-space: nowrap;
+}
+
+.cam-study-btn {
+    background-color: #D74949;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: auto;
+}
+
+.withdraw-btn {
+    background-color: #292929;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: auto;
+}

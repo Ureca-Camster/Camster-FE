@@ -1,8 +1,10 @@
-// StudyInfo.jsx
 import React from 'react';
-import { FaUser, FaEdit } from 'react-icons/fa';
+import { FaUser, FaLock } from 'react-icons/fa';
+import { MdEdit } from "react-icons/md";
+import { IoVideocam } from "react-icons/io5";
+import './StudyInfo.css'
 
-function StudyInfo({
+const StudyInfo = ({
   studyRoom,
   memberCount,
   onEditClick,
@@ -10,70 +12,38 @@ function StudyInfo({
   onCamStudyClick,
   onLeaveClick,
   isLeader
-}) {
+}) => {
   return (
-    <div style={styles.container}>
-      <h1>{studyRoom.studyName}</h1>
-      <div style={styles.descriptionBox}>
+    <div className="study-info-container">
+      <div className="study-info-header">
+        <span className="study-info-emoji">{studyRoom.emoji}</span>
+        <div className="study-info-title-container">
+          <h1 className="study-info-title">{studyRoom.studyName}</h1>
+          {!studyRoom.isPublic && <FaLock className="study-info-lock" />}
+        </div>
+      </div>
+      <div className="study-info-description">
         <p>{studyRoom.description}</p>
         {isLeader && (
-          <FaEdit
-            style={styles.editIcon}
-            onClick={onEditClick}
-          />
+          <button className="edit-button" onClick={onEditClick}>
+            <MdEdit />
+          </button>
         )}
       </div>
-      <div style={styles.memberInfo}>
-        <span style={{ display: "flex", alignItems: "center" }}>
-          <FaUser style={{ marginRight: "8px" }} /> {memberCount}명
-        </span>
-        <button className="custom-btn" onClick={onMemberListClick}>목록 보기</button>
+      <div className="member-info">
+        <div>
+          <FaUser />
+          <span>{memberCount}명</span>
+        </div>
+
+        <button onClick={onMemberListClick} className='member-list-btn'>목록 보기</button>
       </div>
-      <div style={styles.buttonContainer}>
-        <button className="custom-btn" onClick={onCamStudyClick}>캠스터디 시작하기</button>
-        <button className="custom-btn" onClick={onLeaveClick}>탈퇴</button>
+      <div className="action-buttons">
+        <button onClick={onCamStudyClick} className='cam-study-btn'><IoVideocam/> 캠스터디 시작하기</button>
+        <button onClick={onLeaveClick} className='withdraw-btn'>탈퇴</button>
       </div>
     </div>
   );
-}
-
-const styles = {
-  container: {
-    flex: "4",
-    border: "1px solid #8BC9FF",
-    padding: "20px",
-    borderRadius: "10px",
-    height: "500px",
-    overflow: "auto"
-  },
-  descriptionBox: {
-    position: "relative",
-    padding: "20px",
-    border: "1px solid #8BC9FF",
-    borderRadius: "10px"
-  },
-  editIcon: {
-    position: "absolute",
-    bottom: "10px",
-    right: "10px",
-    cursor: "pointer",
-    width: "20px",
-    height: "20px"
-  },
-  memberInfo: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "20px",
-    marginTop: "20px"
-  },
-  buttonContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "20px",
-    marginTop: "20px"
-  }
 };
 
 export default StudyInfo;
