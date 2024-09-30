@@ -6,7 +6,7 @@
 
 .app-title {
     font-size: 35px;
-    margin: 0;
+    margin: 5px 0;
 }
 
 .create-study-button {
@@ -18,4 +18,38 @@
     padding: 5px 10px;
     margin-left: 10px;
     margin-bottom: 5px;
+}
+
+.top-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.progress-bar-container {
+    flex-grow: 1;
+    margin-right: 20px;
+}
+
+.rank-container {
+    width: 320px;
+    /* Rank 컴포넌트의 고정 너비 */
+    flex-shrink: 0;
+    margin: 0 5px;
+}
+
+@media (max-width: 768px) {
+    .top-section {
+        flex-direction: column;
+    }
+
+    .progress-bar-container {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .rank-container {
+        width: 100%;
+    }
 }

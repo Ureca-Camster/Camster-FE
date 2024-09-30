@@ -48,7 +48,7 @@ const Rank = () => {
                         style={{ 
                             backgroundColor: 'white',
                             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                            width: '300px',
+                            width: '320px',
                         }}
                     >
                         <span className="fw-bold" style={{ width: '30px', fontFamily:'Krona One' }}>{index + 1}</span>

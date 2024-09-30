@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaUser, FaLock } from 'react-icons/fa';
+import { FaUser } from 'react-icons/fa';
 import { MdEdit } from "react-icons/md";
 import { IoVideocam } from "react-icons/io5";
 import './StudyInfo.css'
@@ -19,7 +19,6 @@ const StudyInfo = ({
         <span className="study-info-emoji">{studyRoom.emoji}</span>
         <div className="study-info-title-container">
           <h1 className="study-info-title">{studyRoom.studyName}</h1>
-          {!studyRoom.isPublic && <FaLock className="study-info-lock" />}
         </div>
       </div>
       <div className="study-info-description">

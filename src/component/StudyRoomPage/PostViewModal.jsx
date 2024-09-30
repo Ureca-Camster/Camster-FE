@@ -78,19 +78,12 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
       return;
     }
 
-    const commentData = {
-      boardId: post.id,
-      content: newComment,
-      memberId: user.memberId,
-      nickname: user.nickname
-    };
-
-    fetch('/comments', {
+    fetch(`/boards/${post.id}/comments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(commentData),
+      body: JSON.stringify({content: newComment}),
     })
       .then(response => response.json())
       .then(data => {

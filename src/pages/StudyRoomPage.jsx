@@ -207,27 +207,29 @@ function StudyRoomPage() {
   if (!studyRoom) return <div>Loading...</div>;
 
   return (
-    <Container style={styles.container}>
-      <Row>
-        <Col>
-          <StudyInfo
-            studyRoom={studyRoom}
-            memberCount={studyRoom.members.length}
-            onEditClick={() => setIsUpdateModalOpen(true)}
-            onMemberListClick={() => setIsMemberListOpen(true)}
-            onCamStudyClick={handleCamStudy}
-            onLeaveClick={handleStudyOut}
-            isLeader={user.memberId === studyRoom.leaderId}
-          />
-        </Col>
-        <Col>
-          <PostList
-            posts={posts}
-            onCreatePost={() => setIsPostModalOpen(true)}
-            onPostClick={handlePostClick}
-          />
-        </Col>
-      </Row>
+    <>
+      <Container fluid className="m-2">
+        <Row>
+          <Col md={6}>
+            <StudyInfo
+              studyRoom={studyRoom}
+              memberCount={studyRoom.members.length}
+              onEditClick={() => setIsUpdateModalOpen(true)}
+              onMemberListClick={() => setIsMemberListOpen(true)}
+              onCamStudyClick={handleCamStudy}
+              onLeaveClick={handleStudyOut}
+              isLeader={user.memberId === studyRoom.leaderId}
+            />
+          </Col>
+          <Col md={6}>
+            <PostList
+              posts={posts}
+              onCreatePost={() => setIsPostModalOpen(true)}
+              onPostClick={handlePostClick}
+            />
+          </Col>
+        </Row>
+      </Container>
       {isMemberListOpen && (
         <MemberList
           members={studyRoom.members}
@@ -256,45 +258,8 @@ function StudyRoomPage() {
           onPostUpdated={fetchPosts}
         />
       )}
-      <style>{`
-        .custom-btn {
-          padding: 5px 10px;
-          border: 1px solid #8BC9FF;
-          background-color: white;
-          color: black;
-          border-radius: 5px;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-        }
-        .custom-btn:hover {
-          background-color: #8BC9FF;
-          color: white;
-        }
-        ::-webkit-scrollbar {
-          width: 10px;
-          border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-          background-color: #8BC9FF;
-          border-radius: 10px;
-        }
-        ::-webkit-scrollbar-track {
-          background-color: #f5f5f5;
-        }
-      `}</style>
-    </Container>
+    </>
   );
 }
-
-const styles = {
-  container: {
-    display: "flex",
-    gap: "20px",
-    padding: "20px",
-    maxWidth: "1200px",
-    margin: "0 auto",
-    position: "relative"
-  }
-};
 
 export default StudyRoomPage;

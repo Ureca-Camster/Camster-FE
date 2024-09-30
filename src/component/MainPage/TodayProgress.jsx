@@ -38,6 +38,7 @@ const DateText = styled.div`
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin-bottom: 5px;
 `;
 
 const ProgressBar = styled.div`
@@ -59,8 +60,8 @@ const Progress = styled.div`
 const TimeInfo = styled.div`
     display: flex;
     justify-content: space-between;
-    font-size: 1.5rem;
-    margin-top: 5px;
+    font-size: 1.7rem;
+    margin-top: 2px;
 `;
 
 const LeftText = styled.div`
