@@ -16,7 +16,7 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
   }, [post.id]);
 
   const fetchComments = () => {
-    fetch(`/comments/board/${post.id}`)
+    fetch(`/boards/${post.id}/comments}`)
       .then(response => response.json())
       .then(data => setComments(Array.isArray(data) ? data : []))
       .catch(error => {
@@ -26,7 +26,6 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
   };
 
   const handleEditSubmit = () => {
-    if (window.confirm("정말로 게시물을 수정하시겠습니까?")) {
       const updatedPost = {
         title: editedTitle,
         content: editedContent
@@ -51,11 +50,10 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
           console.error("게시물 수정에 실패했습니다.", error);
           alert("게시물 수정에 실패했습니다.");
         });
-    }
   };
 
   const handleDelete = () => {
-    if (window.confirm("정말로 게시물을 삭제하시겠습니까?")) {
+    if (window.confirm("게시물을 삭제하시겠습니까?")) {
       fetch(`/studies/${studyId}/boards/${post.id}`, {
         method: 'DELETE',
       })
@@ -102,7 +100,7 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
   };
 
   const handleSaveEditedComment = (commentId) => {
-    fetch(`/comments/${commentId}`, {
+    fetch(`/boards/${post.id}/comments/${commentId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -121,8 +119,8 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
   };
 
   const handleDeleteComment = (commentId) => {
-    if (window.confirm("정말로 댓글을 삭제하시겠습니까?")) {
-      fetch(`/comments/${commentId}`, {
+    if (window.confirm("댓글을 삭제하시겠습니까?")) {
+      fetch(`/boards/${post.id}/comments/${commentId}`, {
         method: "DELETE",
       })
         .then(() => {
