@@ -77,8 +77,7 @@ function StudyRoomPage() {
         setIsUpdateModalOpen(false);
         Swal.fire({
           icon: 'success',
-          title: '수정 완료',
-          toast: true,
+          title: '스터디 정보 수정 완료!',
           showConfirmButton: false,
           timer: 1200
         });
@@ -89,7 +88,6 @@ function StudyRoomPage() {
           icon: 'error',
           title: '수정 실패',
           text: '다시 시도해 주세요',
-          toast: true,
           showConfirmButton: false,
           timer: 1200
         });
@@ -138,7 +136,6 @@ function StudyRoomPage() {
             Swal.fire({
               icon: 'success',
               title: '탈퇴 완료!',
-              toast: true,
               showConfirmButton: false,
               timer: 1200
             });
@@ -150,7 +147,6 @@ function StudyRoomPage() {
               icon: 'error',
               title: '탈퇴 오류',
               text: '다시 시도해주세요.',
-              toast: true,
               showConfirmButton: false,
               timer: 1200
             });
@@ -173,13 +169,6 @@ function StudyRoomPage() {
     .then(data => {
       setPosts([...posts, data]);
       setIsPostModalOpen(false);
-      Swal.fire({
-        icon: 'success',
-        title: '게시물 등록 완료',
-        toast: true,
-        showConfirmButton: false,
-        timer: 1200
-      });
     })
     .catch(error => {
       console.error("Failed to submit post:", error);
@@ -187,7 +176,6 @@ function StudyRoomPage() {
         icon: 'error',
         title: '게시물 등록 실패',
         text: '다시 시도해 주세요',
-        toast: true,
         showConfirmButton: false,
         timer: 1200
       });
@@ -213,6 +201,11 @@ function StudyRoomPage() {
     setSelectedPost(updatedPost);
   };
 
+  const handlePostDeleted = (deletedPostId) => {
+    setPosts(prevPosts => prevPosts.filter(post => post.id !== deletedPostId));
+    setSelectedPost(null);
+    setIsPostViewModalOpen(false);
+  };
 
   if (!studyRoom) return <div>Loading...</div>;
 
@@ -266,6 +259,7 @@ function StudyRoomPage() {
           post={selectedPost}
           onClose={handleClosePostViewModal}
           onPostUpdated={handlePostUpdated}
+          onPostDeleted={handlePostDeleted}
         />
       )}
     </>

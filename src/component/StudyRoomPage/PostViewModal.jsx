@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useAppSelector } from '../../store/hooks.ts';
 import './PostViewModal.css';
+import Swal from 'sweetalert2';
 
-function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
+function PostViewModal({ studyId, post, onClose, onPostUpdated, onPostDeleted }) {
   const [editedTitle, setEditedTitle] = useState(post.title);
   const [editedContent, setEditedContent] = useState(post.content);
   const [comments, setComments] = useState([]);
@@ -41,40 +42,72 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
         if (!response.ok) {
           throw new Error("게시물 수정에 실패했습니다.");
         }
-        return response.text(); // 응답 본문이 비어있을 수 있으므로 text()로 받습니다.
+        return response.text(); // 응답 본문이 비어있을 수 있으므로 text()로
       })
       .then(data => {
         setIsEditingPost(false);
-        // 서버 응답이 성공적이면 로컬 데이터를 업데이트합니다.
+        // 서버 응답이 성공적이면 로컬 데이터를 업데이트
         const updatedPostWithAllData = {
           ...post,
           ...updatedPost
         };
         onPostUpdated(updatedPostWithAllData);
-        alert("게시물이 성공적으로 수정되었습니다.");
+        // Swal.fire({
+        //   icon: 'success',
+        //   title: '게시물 수정 완료!',
+        //   showConfirmButton: false,
+        //   timer: 1200
+        // });
       })
       .catch(error => {
         console.error("게시물 수정에 실패했습니다.", error);
-        alert("게시물 수정에 실패했습니다.");
+        Swal.fire({
+          icon: 'error',
+          title: '게시물 수정 실패',
+          text: '다시 시도해주세요.',
+          showConfirmButton: false,
+          timer: 1200
+        });
       });
   };
 
   const handleDelete = () => {
-    if (window.confirm("게시물을 삭제하시겠습니까?")) {
-      fetch(`/studies/${studyId}/boards/${post.id}`, {
-        method: 'DELETE',
-      })
-        .then(response => {
-          if (!response.ok) throw new Error("게시물 삭제에 실패했습니다.");
-          onClose();
-          onPostUpdated();
-          alert("게시물이 성공적으로 삭제되었습니다.");
+    Swal.fire({
+      title: '게시물을 삭제하시겠습니까?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '삭제',
+      cancelButtonText: '취소'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/studies/${studyId}/boards/${post.id}`, {
+          method: 'DELETE',
         })
-        .catch(error => {
-          console.error("게시물 삭제에 실패했습니다.", error);
-          alert("게시물 삭제에 실패했습니다.");
-        });
-    }
+          .then(response => {
+            if (!response.ok) throw new Error("게시물 삭제에 실패했습니다.");
+            onPostDeleted(post.id); // 부모 컴포넌트에 삭제된 게시물 ID 전달
+            onClose();
+            // Swal.fire({
+            //   icon: 'success',
+            //   title: '게시물 삭제 완료',
+            //   showConfirmButton: false,
+            //   timer: 1200
+            // });
+          })
+          .catch(error => {
+            console.error("게시물 삭제에 실패했습니다.", error);
+            Swal.fire({
+              icon: 'error',
+              title: '게시물 삭제 실패',
+              text: '다시 시도해주세요.',
+              showConfirmButton: false,
+              timer: 1200
+            });
+          });
+      }
+    });
   };
 
   const handleAddComment = () => {
@@ -97,7 +130,13 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
       })
       .catch(error => {
         console.error("댓글 추가에 실패했습니다.", error);
-        alert("댓글 추가에 실패했습니다.");
+        Swal.fire({
+          icon: 'error',
+          title: '댓글 작성 실패',
+          text: '다시 시도해주세요.',
+          showConfirmButton: false,
+          timer: 1200
+        });
       });
   };
 
@@ -131,27 +170,60 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
         );
         setEditingCommentId(null);
         setEditedCommentContent("");
-        alert("댓글이 성공적으로 수정되었습니다.");
+        // Swal.fire({
+        //   icon: 'success',
+        //   title: '댓글 수정 완료',
+        //   showConfirmButton: false,
+        //   timer: 1200
+        // });
       })
       .catch(error => {
         console.error("댓글 수정에 실패했습니다.", error);
-        alert("댓글 수정에 실패했습니다.");
+        Swal.fire({
+          icon: 'error',
+          title: '댓글 수정 실패',
+          text: '다시 시도해주세요.',
+          showConfirmButton: false,
+          timer: 1200
+        });
       });
   };
 
   const handleDeleteComment = (commentId) => {
-    if (window.confirm("댓글을 삭제하시겠습니까?")) {
-      fetch(`/boards/${post.id}/comments/${commentId}`, {
-        method: "DELETE",
-      })
-        .then(() => {
-          setComments(comments.filter(comment => comment.id !== commentId));
+    Swal.fire({
+      title: '댓글을 삭제하시겠습니까?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '삭제',
+      cancelButtonText: '취소'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/boards/${post.id}/comments/${commentId}`, {
+          method: "DELETE",
         })
-        .catch(error => {
-          console.error("댓글 삭제에 실패했습니다.", error);
-          alert("댓글 삭제에 실패했습니다.");
-        });
-    }
+          .then(() => {
+            setComments(comments.filter(comment => comment.id !== commentId));
+            // Swal.fire({
+            //   icon: 'success',
+            //   title: '댓글 삭제 완료',
+            //   showConfirmButton: false,
+            //   timer: 1200
+            // });
+          })
+          .catch(error => {
+            console.error("댓글 삭제에 실패했습니다.", error);
+            Swal.fire({
+              icon: 'error',
+              title: '댓글 삭제 실패',
+              text: '다시 시도해주세요.',
+              showConfirmButton: false,
+              timer: 1200
+            });
+          });
+      }
+    });
   };
 
   return (
