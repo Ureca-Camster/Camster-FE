@@ -3,6 +3,7 @@
     background-color: white;
     border: 6px solid #8BC9FF;
     border-radius: 50px;
+    min-width: 450px;
 }
 
 .study-update-modal .modal-header {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Col, Container, Row } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
 import { useAppSelector, useAppDispatch } from '../store/hooks.ts';
 import { addMyStudyGroup, resetMyStudyGroups, setMyStudyGroups } from '../store/myStudyGroupsSlice.ts';
 import { useNavigate } from 'react-router-dom';
@@ -185,7 +185,7 @@ function MainPage() {
 
     return (
         <>
-            <Container fluid className='m-2'>
+            <Container fluid>
                 <div className="top-section">
                     <div className="progress-bar-container">
                         <TodayProgress />

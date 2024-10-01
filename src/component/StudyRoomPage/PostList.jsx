@@ -24,7 +24,7 @@ function PostList({ posts, onCreatePost, onPostClick }) {
             ))}
           </ul>
         ) : (
-          <p>게시물이 없습니다.</p>
+          <p style={{marginLeft: "20px"}}>게시물이 없습니다.</p>
         )}
       </div>
     </div>
