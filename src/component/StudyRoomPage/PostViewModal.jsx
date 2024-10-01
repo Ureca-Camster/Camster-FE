@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useAppSelector } from '../../store/hooks.ts';
 import './PostViewModal.css';
 import Swal from 'sweetalert2';
+import { MdClose } from "react-icons/md";
+import { Button } from 'react-bootstrap';
 
 function PostViewModal({ studyId, post, onClose, onPostUpdated, onPostDeleted }) {
   const [editedTitle, setEditedTitle] = useState(post.title);
@@ -32,7 +34,7 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated, onPostDeleted })
       title: editedTitle,
       content: editedContent
     };
-  
+
     fetch(`/studies/${studyId}/boards/${post.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -121,7 +123,7 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated, onPostDeleted })
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({content: newComment}),
+      body: JSON.stringify({ content: newComment }),
     })
       .then(response => response.json())
       .then(data => {
@@ -161,10 +163,10 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated, onPostDeleted })
       })
       .then(() => {
         // 서버 응답이 성공적이면 로컬 데이터를 업데이트합니다.
-        setComments(prevComments => 
-          prevComments.map(comment => 
-            comment.id === commentId 
-              ? { ...comment, content: editedCommentContent } 
+        setComments(prevComments =>
+          prevComments.map(comment =>
+            comment.id === commentId
+              ? { ...comment, content: editedCommentContent }
               : comment
           )
         );
@@ -229,103 +231,119 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated, onPostDeleted })
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <button onClick={onClose} className="close-button">X</button>
-        
-        {user.memberId === post.memberId && (
-          <div className="edit-delete-buttons">
-            <button onClick={() => setIsEditingPost(!isEditingPost)} className="custom-btn">
-              {isEditingPost ? "수정 취소" : "수정"}
-            </button>
-            <button onClick={handleDelete} className="custom-btn">삭제</button>
-          </div>
-        )}
+        <div className="modal-header">
+          <button onClick={onClose} className="close-button"><MdClose /></button>
+        </div>
 
-        {isEditingPost ? (
-          <>
-            <input
-              type="text"
-              value={editedTitle}
-              onChange={(e) => setEditedTitle(e.target.value)}
-              className="input"
-              placeholder="제목을 입력하세요"
-            />
-            <textarea
-              value={editedContent}
-              onChange={(e) => setEditedContent(e.target.value)}
-              className="textarea"
-              placeholder="내용을 입력하세요"
-            />
-            <button onClick={handleEditSubmit} className="custom-btn">저장</button>
-          </>
-        ) : (
-          <>
-            <h1>{post.title}</h1>
-            <p>작성자: {post.nickname}</p>
-            <p>작성일: {post.createDate}</p>
-            <p>{post.content}</p>
-          </>
-        )}
+        <div className="modal-body">
+          {isEditingPost ? (
+            <>
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="input"
+                placeholder="제목을 입력하세요"
+              />
+              <textarea
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="textarea"
+                placeholder="내용을 입력하세요"
+              />
+              <div className="edit-buttons">
+                <Button onClick={handleEditSubmit} className="custom-btn" variant="light">저장</Button>
+                <Button onClick={() => setIsEditingPost(false)} className="custom-btn" variant="light">취소</Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h1>{post.title}</h1>
+              <p>작성자: {post.nickname}</p>
+              <p>작성일: {post.createDate}</p>
+              <p style={{marginBottom: "20px"}}>{post.content}</p>
+              {user.memberId === post.memberId && (
+                <div className="edit-buttons">
+                  <Button
+                    variant="light"
+                    onClick={() => setIsEditingPost(true)}
+                    className="custom-btn">
+                    수정
+                  </Button>
+                  <Button
+                    variant="light"
+                    onClick={handleDelete} className="custom-btn">삭제</Button>
+                </div>
+              )}
+            </>
+          )}
 
-        <hr className="hr" />
+          <hr className="hr" />
 
-        <h3>댓글</h3>
-        {comments.length > 0 ? (
-          <ul className="comment-list">
-            {comments.map(comment => (
-              <li key={comment.id} className="comment-item">
-                {editingCommentId === comment.id ? (
-                  <>
-                    <textarea
-                      value={editedCommentContent}
-                      onChange={(e) => setEditedCommentContent(e.target.value)}
-                      className="textarea"
-                    />
-                    <button onClick={() => handleSaveEditedComment(comment.id)} className="custom-btn">
-                      저장
-                    </button>
-                    <button onClick={() => setEditingCommentId(null)} className="custom-btn">
-                      취소
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <p>{comment.content}</p>
-                    <div className="comment-info">
-                      <p>작성자: {comment.nickname || "알 수 없음"}</p>
-                      <p>작성일: {comment.createdDate}</p>
-                    </div>
-                    {(user.memberId === post.memberId || user.memberId === comment.memberId) && (
+          <h3>댓글</h3>
+          {comments.length > 0 ? (
+            <ul className="comment-list">
+              {comments.map(comment => (
+                <li key={comment.id} className="comment-item">
+                  {editingCommentId === comment.id ? (
+                    <>
+                      <textarea
+                        value={editedCommentContent}
+                        onChange={(e) => setEditedCommentContent(e.target.value)}
+                        className="textarea"
+                      />
                       <div className="comment-buttons">
-                        <button 
-                          onClick={() => handleEditComment(comment.id, comment.content)} 
-                          className="custom-btn"
-                        >
-                          수정
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteComment(comment.id)} 
-                          className="custom-btn"
-                        >
-                          삭제
-                        </button>
+                        <Button variant="" onClick={() => handleSaveEditedComment(comment.id)} className="custom-btn">
+                          저장
+                        </Button>
+                        <Button onClick={() => setEditingCommentId(null)} className="custom-btn">
+                          취소
+                        </Button></div>
+                    </>
+                  ) : (
+                    <>
+                      <p>{comment.content}</p>
+                      <div className="comment-info">
+                        <p>작성자: {comment.nickname || "알 수 없음"}</p>
+                        <p>작성일: {comment.createdDate}</p>
                       </div>
-                    )}
-                  </>
-                )}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>작성된 댓글이 없습니다.</p>
-        )}
+                      {(user.memberId === post.memberId || user.memberId === comment.memberId) && (
+                        <div className="comment-buttons">
+                          <Button
+                            variant="light"
+                            onClick={() => handleEditComment(comment.id, comment.content)}
+                            className="custom-btn"
+                          >
+                            수정
+                          </Button>
+                          <Button
+                            variant="light"
+                            onClick={() => handleDeleteComment(comment.id)}
+                            className="custom-btn"
+                          >
+                            삭제
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>작성된 댓글이 없습니다.</p>
+          )}
 
-        <textarea
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="댓글을 입력하세요"
-          className="textarea"
-        />
-        <button onClick={handleAddComment} className="custom-btn">댓글 달기</button>
+          <div className="comment-input-container">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="댓글을 입력하세요"
+              className="textarea"
+            />
+            <Button variant="light" onClick={handleAddComment} className="custom-btn">댓글 달기</Button>
+          </div>
+        </div>
       </div>
     </div>
   );
