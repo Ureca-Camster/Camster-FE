@@ -1,0 +1,124 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.305);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    border: 6px solid #8BC9FF;
+    border-radius: 50px;
+    width: 80%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 15px 25px;
+}
+
+.modal-header {
+    padding: 10px;
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: -5px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 15px;
+}
+
+.modal-body p {
+    margin-bottom: 3px;
+}
+
+.edit-delete-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #8BC9FF;
+}
+
+.textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 0px;
+    border-radius: 5px;
+    border: 1px solid #8BC9FF;
+    min-height: 79px;
+}
+
+.hr {
+    border-top: 1px solid #8BC9FF;
+    margin: 20px 0;
+}
+
+.comment-list {
+    list-style: none;
+    padding: 0;
+}
+
+.comment-item {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.comment-info {
+    font-size: 12px;
+    color: gray;
+}
+
+.comment-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.edit-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-buttons .custom-btn {
+    flex: 1;
+}
+
+.comment-input-container {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.comment-input-container .textarea {
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.comment-input-container .custom-btn {
+    width: 100%;
+}

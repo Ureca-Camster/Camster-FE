@@ -1,8 +1,9 @@
 .study-create-modal .modal-content {
-    padding: 18px;
+    padding: 15px;
     background-color: white;
     border: 6px solid #8BC9FF;
     border-radius: 50px;
+    min-width: 450px;
 }
 
 .study-create-modal .modal-header {

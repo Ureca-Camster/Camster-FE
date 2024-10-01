@@ -145,7 +145,7 @@ const MonthlyTracker = ({ memberId }) => {
     const hours = Math.floor(time / 3600);
     const minutes = Math.floor((time % 3600) / 60);
     const seconds = time % 60;
-    const percentage = time > 0 ? Math.min(100, Math.round((time / user.goalTime) * 100)) : 0;
+    const percentage = time > 0 ? Math.round((time / user.goalTime) * 100) : 0;
 
     return {
       timeFormatted: `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`,

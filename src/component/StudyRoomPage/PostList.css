@@ -1,0 +1,60 @@
+.post-list-container {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    padding: 15px 20px 2px 20px;
+    background-color: #f8f8f8;
+    border-radius: 25px;
+}
+
+.post-create {
+    position: relative;
+    background-color: #E6E6E6;
+    border-radius: 15px;
+    padding: 6px 10px 3px 10px;
+    font-size: 18px;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+.post-create-button{
+    font-size: 22px;
+    margin: 15px 15px 18px 15px;
+}
+
+.post-item {
+    text-decoration: none;
+    list-style-type: none;
+    margin-left: 0;
+    margin-top: 15px;
+}
+
+.post-link {
+    padding: 20px 20px 10px 20px;
+    cursor: pointer;
+    border-radius: 15px;
+    color: inherit;
+    position: relative;
+    background-color: #F1F1F1;
+}
+
+.post-link p {
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.post-link .post-item-title {
+    font-size: 18px;
+}
+
+.post-link .post-content-preview {
+    margin-top: -5px;
+    font-size: 15px;
+}
+
+.post-content-preview {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}

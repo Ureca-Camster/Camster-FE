@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import './Input.css';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 function LoginForm() {
     const dispatch = useDispatch();
@@ -26,20 +27,23 @@ function LoginForm() {
                     memberPassword
                 }),
             });
+            
             if (!response.ok) {
-                throw new Error('Login failed');
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Login failed');
             }
+            
             return await response.json();
         } catch (error) {
             console.error('Login failed:', error);
-            return null;
+            throw error;
         }
     };
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        const loginResponse = await loginUser(email, password);
-        if (loginResponse) {
+        try {
+            const loginResponse = await loginUser(email, password);
             dispatch(login());
             dispatch(setUser({
                 memberId: loginResponse.memberId,
@@ -48,9 +52,32 @@ function LoginForm() {
                 goalTime: loginResponse.goalTime,
                 todayTime: loginResponse.todayTime,
             }));
+            await Swal.fire({
+                icon: "success",
+                title: "로그인 성공",
+                timer: 1200,
+                showConfirmButton: false,
+            });
             navigate("/");
-        } else {
-            console.log('Login failed');
+        } catch (error) {
+            console.error('Login error:', error);
+            if (error.message === 'Invalid email or password') {
+                Swal.fire({
+                    icon: "error",
+                    title: "로그인 실패",
+                    text: "이메일 또는 비밀번호가 올바르지 않습니다.",
+                    timer: 1200,
+                    showConfirmButton: false,
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "로그인 오류",
+                    text: "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.",
+                    timer: 1200,
+                    showConfirmButton: false,
+                });
+            }
             setPassword(''); // Reset password input
         }
     };

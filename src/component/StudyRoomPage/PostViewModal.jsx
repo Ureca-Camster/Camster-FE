@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useAppSelector } from '../../store/hooks.ts';
+import './PostViewModal.css';
+import Swal from 'sweetalert2';
+import { MdClose } from "react-icons/md";
+import { Button } from 'react-bootstrap';
 
-function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
+function PostViewModal({ studyId, post, onClose, onPostUpdated, onPostDeleted }) {
   const [editedTitle, setEditedTitle] = useState(post.title);
   const [editedContent, setEditedContent] = useState(post.content);
   const [comments, setComments] = useState([]);
@@ -16,7 +20,7 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
   }, [post.id]);
 
   const fetchComments = () => {
-    fetch(`/comments/board/${post.id}`)
+    fetch(`/boards/${post.id}/comments`)
       .then(response => response.json())
       .then(data => setComments(Array.isArray(data) ? data : []))
       .catch(error => {
@@ -26,50 +30,86 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
   };
 
   const handleEditSubmit = () => {
-    if (window.confirm("정말로 게시물을 수정하시겠습니까?")) {
-      const updatedPost = {
-        title: editedTitle,
-        content: editedContent
-      };
-      console.log("updatePost", updatedPost);
+    const updatedPost = {
+      title: editedTitle,
+      content: editedContent
+    };
 
-      fetch(`/studies/${studyId}/boards/${post.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedPost)
+    fetch(`/studies/${studyId}/boards/${post.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedPost)
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("게시물 수정에 실패했습니다.");
+        }
+        return response.text(); // 응답 본문이 비어있을 수 있으므로 text()로
       })
-        .then(response => {
-          if (!response.ok) throw new Error("게시물 수정에 실패했습니다.");
-          return response.json();
-        })
-        .then(data => {
-          setIsEditingPost(false);
-          onPostUpdated();
-          alert("게시물이 성공적으로 수정되었습니다.");
-        })
-        .catch(error => {
-          console.error("게시물 수정에 실패했습니다.", error);
-          alert("게시물 수정에 실패했습니다.");
+      .then(data => {
+        setIsEditingPost(false);
+        // 서버 응답이 성공적이면 로컬 데이터를 업데이트
+        const updatedPostWithAllData = {
+          ...post,
+          ...updatedPost
+        };
+        onPostUpdated(updatedPostWithAllData);
+        // Swal.fire({
+        //   icon: 'success',
+        //   title: '게시물 수정 완료!',
+        //   showConfirmButton: false,
+        //   timer: 1200
+        // });
+      })
+      .catch(error => {
+        console.error("게시물 수정에 실패했습니다.", error);
+        Swal.fire({
+          icon: 'error',
+          title: '게시물 수정 실패',
+          text: '다시 시도해주세요.',
+          showConfirmButton: false,
+          timer: 1200
         });
-    }
+      });
   };
 
   const handleDelete = () => {
-    if (window.confirm("정말로 게시물을 삭제하시겠습니까?")) {
-      fetch(`/studies/${studyId}/boards/${post.id}`, {
-        method: 'DELETE',
-      })
-        .then(response => {
-          if (!response.ok) throw new Error("게시물 삭제에 실패했습니다.");
-          onClose();
-          onPostUpdated();
-          alert("게시물이 성공적으로 삭제되었습니다.");
+    Swal.fire({
+      title: '게시물을 삭제하시겠습니까?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '삭제',
+      cancelButtonText: '취소'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/studies/${studyId}/boards/${post.id}`, {
+          method: 'DELETE',
         })
-        .catch(error => {
-          console.error("게시물 삭제에 실패했습니다.", error);
-          alert("게시물 삭제에 실패했습니다.");
-        });
-    }
+          .then(response => {
+            if (!response.ok) throw new Error("게시물 삭제에 실패했습니다.");
+            onPostDeleted(post.id); // 부모 컴포넌트에 삭제된 게시물 ID 전달
+            onClose();
+            // Swal.fire({
+            //   icon: 'success',
+            //   title: '게시물 삭제 완료',
+            //   showConfirmButton: false,
+            //   timer: 1200
+            // });
+          })
+          .catch(error => {
+            console.error("게시물 삭제에 실패했습니다.", error);
+            Swal.fire({
+              icon: 'error',
+              title: '게시물 삭제 실패',
+              text: '다시 시도해주세요.',
+              showConfirmButton: false,
+              timer: 1200
+            });
+          });
+      }
+    });
   };
 
   const handleAddComment = () => {
@@ -78,19 +118,12 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
       return;
     }
 
-    const commentData = {
-      boardId: post.id,
-      content: newComment,
-      memberId: user.memberId,
-      nickname: user.nickname
-    };
-
-    fetch('/comments', {
+    fetch(`/boards/${post.id}/comments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(commentData),
+      body: JSON.stringify({ content: newComment }),
     })
       .then(response => response.json())
       .then(data => {
@@ -99,7 +132,13 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
       })
       .catch(error => {
         console.error("댓글 추가에 실패했습니다.", error);
-        alert("댓글 추가에 실패했습니다.");
+        Swal.fire({
+          icon: 'error',
+          title: '댓글 작성 실패',
+          text: '다시 시도해주세요.',
+          showConfirmButton: false,
+          timer: 1200
+        });
       });
   };
 
@@ -109,220 +148,205 @@ function PostViewModal({ studyId, post, onClose, onPostUpdated }) {
   };
 
   const handleSaveEditedComment = (commentId) => {
-    fetch(`/comments/${commentId}`, {
+    fetch(`/boards/${post.id}/comments/${commentId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ content: editedCommentContent }),
     })
-      .then(response => response.json())
-      .then(updatedComment => {
-        setComments(comments.map(comment => 
-          comment.commentId === commentId ? updatedComment : comment
-        ));
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("댓글 수정에 실패했습니다.");
+        }
+        return response.text(); // 응답 본문이 비어있을 수 있으므로 text()로 받습니다.
+      })
+      .then(() => {
+        // 서버 응답이 성공적이면 로컬 데이터를 업데이트합니다.
+        setComments(prevComments =>
+          prevComments.map(comment =>
+            comment.id === commentId
+              ? { ...comment, content: editedCommentContent }
+              : comment
+          )
+        );
         setEditingCommentId(null);
         setEditedCommentContent("");
+        // Swal.fire({
+        //   icon: 'success',
+        //   title: '댓글 수정 완료',
+        //   showConfirmButton: false,
+        //   timer: 1200
+        // });
       })
-      .catch(error => console.error("댓글 수정에 실패했습니다.", error));
+      .catch(error => {
+        console.error("댓글 수정에 실패했습니다.", error);
+        Swal.fire({
+          icon: 'error',
+          title: '댓글 수정 실패',
+          text: '다시 시도해주세요.',
+          showConfirmButton: false,
+          timer: 1200
+        });
+      });
   };
 
   const handleDeleteComment = (commentId) => {
-    if (window.confirm("정말로 댓글을 삭제하시겠습니까?")) {
-      fetch(`/comments/${commentId}`, {
-        method: "DELETE",
-      })
-        .then(() => {
-          setComments(comments.filter(comment => comment.commentId !== commentId));
+    Swal.fire({
+      title: '댓글을 삭제하시겠습니까?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '삭제',
+      cancelButtonText: '취소'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/boards/${post.id}/comments/${commentId}`, {
+          method: "DELETE",
         })
-        .catch(error => {
-          console.error("댓글 삭제에 실패했습니다.", error);
-          alert("댓글 삭제에 실패했습니다.");
-        });
-    }
+          .then(() => {
+            setComments(comments.filter(comment => comment.id !== commentId));
+            // Swal.fire({
+            //   icon: 'success',
+            //   title: '댓글 삭제 완료',
+            //   showConfirmButton: false,
+            //   timer: 1200
+            // });
+          })
+          .catch(error => {
+            console.error("댓글 삭제에 실패했습니다.", error);
+            Swal.fire({
+              icon: 'error',
+              title: '댓글 삭제 실패',
+              text: '다시 시도해주세요.',
+              showConfirmButton: false,
+              timer: 1200
+            });
+          });
+      }
+    });
   };
 
   return (
-    <div style={styles.modalOverlay}>
-      <div style={styles.modalContent}>
-        <button onClick={onClose} style={styles.closeButton}>X</button>
-        
-        {user.memberId === post.memberId && (
-          <div style={styles.editDeleteButtons}>
-            <button onClick={() => setIsEditingPost(!isEditingPost)} className="custom-btn">
-              {isEditingPost ? "수정 취소" : "수정"}
-            </button>
-            <button onClick={handleDelete} className="custom-btn">삭제</button>
-          </div>
-        )}
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="modal-header">
+          <button onClick={onClose} className="close-button"><MdClose /></button>
+        </div>
 
-        {isEditingPost ? (
-          <>
-            <input
-              type="text"
-              value={editedTitle}
-              onChange={(e) => setEditedTitle(e.target.value)}
-              style={styles.input}
-              placeholder="제목을 입력하세요"
-            />
-            <textarea
-              value={editedContent}
-              onChange={(e) => setEditedContent(e.target.value)}
-              style={styles.textarea}
-              placeholder="내용을 입력하세요"
-            />
-            <button onClick={handleEditSubmit} className="custom-btn">저장</button>
-          </>
-        ) : (
-          <>
-            <h1>{post.title}</h1>
-            <p>작성자: {post.nickname}</p>
-            <p>작성일: {post.createDate}</p>
-            <p>{post.content}</p>
-          </>
-        )}
+        <div className="modal-body">
+          {isEditingPost ? (
+            <>
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="input"
+                placeholder="제목을 입력하세요"
+              />
+              <textarea
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="textarea"
+                placeholder="내용을 입력하세요"
+              />
+              <div className="edit-buttons">
+                <Button onClick={handleEditSubmit} className="custom-btn" variant="light">저장</Button>
+                <Button onClick={() => setIsEditingPost(false)} className="custom-btn" variant="light">취소</Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h1>{post.title}</h1>
+              <p>작성자: {post.nickname}</p>
+              <p>작성일: {post.createDate}</p>
+              <p style={{marginBottom: "20px"}}>{post.content}</p>
+              {user.memberId === post.memberId && (
+                <div className="edit-buttons">
+                  <Button
+                    variant="light"
+                    onClick={() => setIsEditingPost(true)}
+                    className="custom-btn">
+                    수정
+                  </Button>
+                  <Button
+                    variant="light"
+                    onClick={handleDelete} className="custom-btn">삭제</Button>
+                </div>
+              )}
+            </>
+          )}
 
-        <hr style={styles.hr} />
+          <hr className="hr" />
 
-        <h3>댓글</h3>
-        {comments.length > 0 ? (
-          <ul style={styles.commentList}>
-            {comments.map(comment => (
-              <li key={comment.commentId} style={styles.commentItem}>
-                {editingCommentId === comment.commentId ? (
-                  <>
-                    <textarea
-                      value={editedCommentContent}
-                      onChange={(e) => setEditedCommentContent(e.target.value)}
-                      style={styles.textarea}
-                    />
-                    <button onClick={() => handleSaveEditedComment(comment.commentId)} className="custom-btn">
-                      저장
-                    </button>
-                    <button onClick={() => setEditingCommentId(null)} className="custom-btn">
-                      취소
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <p>{comment.content}</p>
-                    <div style={styles.commentInfo}>
-                      <p>작성자: {comment.nickname || "알 수 없음"}</p>
-                      <p>작성일: {new Date(comment.createdDate).toLocaleString()}</p>
-                    </div>
-                    {(user.memberId === post.memberId || user.memberId === comment.memberId) && (
-                      <div style={styles.commentButtons}>
-                        <button 
-                          onClick={() => handleEditComment(comment.commentId, comment.content)} 
-                          className="custom-btn"
-                        >
-                          수정
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteComment(comment.commentId)} 
-                          className="custom-btn"
-                        >
-                          삭제
-                        </button>
+          <h3>댓글</h3>
+          {comments.length > 0 ? (
+            <ul className="comment-list">
+              {comments.map(comment => (
+                <li key={comment.id} className="comment-item">
+                  {editingCommentId === comment.id ? (
+                    <>
+                      <textarea
+                        value={editedCommentContent}
+                        onChange={(e) => setEditedCommentContent(e.target.value)}
+                        className="textarea"
+                      />
+                      <div className="comment-buttons">
+                        <Button variant="" onClick={() => handleSaveEditedComment(comment.id)} className="custom-btn">
+                          저장
+                        </Button>
+                        <Button onClick={() => setEditingCommentId(null)} className="custom-btn">
+                          취소
+                        </Button></div>
+                    </>
+                  ) : (
+                    <>
+                      <p>{comment.content}</p>
+                      <div className="comment-info">
+                        <p>작성자: {comment.nickname || "알 수 없음"}</p>
+                        <p>작성일: {comment.createdDate}</p>
                       </div>
-                    )}
-                  </>
-                )}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>작성된 댓글이 없습니다.</p>
-        )}
+                      {(user.memberId === post.memberId || user.memberId === comment.memberId) && (
+                        <div className="comment-buttons">
+                          <Button
+                            variant="light"
+                            onClick={() => handleEditComment(comment.id, comment.content)}
+                            className="custom-btn"
+                          >
+                            수정
+                          </Button>
+                          <Button
+                            variant="light"
+                            onClick={() => handleDeleteComment(comment.id)}
+                            className="custom-btn"
+                          >
+                            삭제
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>작성된 댓글이 없습니다.</p>
+          )}
 
-        <textarea
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="댓글을 입력하세요"
-          style={styles.textarea}
-        />
-        <button onClick={handleAddComment} className="custom-btn">댓글 달기</button>
+          <div className="comment-input-container">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="댓글을 입력하세요"
+              className="textarea"
+            />
+            <Button variant="light" onClick={handleAddComment} className="custom-btn">댓글 달기</Button>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-
-const styles = {
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '10px',
-    width: '80%',
-    maxWidth: '800px',
-    maxHeight: '90vh',
-    overflowY: 'auto',
-    position: 'relative',
-  },
-  closeButton: {
-    position: 'absolute',
-    top: '10px',
-    right: '10px',
-    background: 'none',
-    border: 'none',
-    fontSize: '20px',
-    cursor: 'pointer',
-  },
-  editDeleteButtons: {
-    position: 'absolute',
-    top: '10px',
-    right: '40px',
-    display: 'flex',
-    gap: '10px',
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    marginBottom: '10px',
-    borderRadius: '5px',
-    border: '1px solid #8BC9FF',
-  },
-  textarea: {
-    width: '100%',
-    padding: '10px',
-    marginBottom: '10px',
-    borderRadius: '5px',
-    border: '1px solid #8BC9FF',
-    minHeight: '100px',
-  },
-  hr: {
-    borderTop: '1px solid #8BC9FF',
-    margin: '20px 0',
-  },
-  commentList: {
-    listStyle: 'none',
-    padding: 0,
-  },
-  commentItem: {
-    marginBottom: '20px',
-    borderBottom: '1px solid #e0e0e0',
-    paddingBottom: '10px',
-  },
-  commentInfo: {
-    fontSize: '12px',
-    color: 'gray',
-  },
-  commentButtons: {
-    marginTop: '10px',
-    display: 'flex',
-    gap: '10px',
-  },
-};
 
 export default PostViewModal;

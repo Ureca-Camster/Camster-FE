@@ -3,6 +3,7 @@
     background-color: white;
     border: 6px solid #8BC9FF;
     border-radius: 50px;
+    min-width: 450px;
 }
 
 .study-update-modal .modal-header {
@@ -84,4 +85,25 @@
 
 .study-update-modal .modal-content {
     overflow: visible;
+}
+
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.password-toggle::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    bottom: -10px;
+    left: -10px;
 }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Col, Container, Row } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
 import { useAppSelector, useAppDispatch } from '../store/hooks.ts';
-import { addMyStudyGroup, resetMyStudyGroups, setMyStudyGroups  } from '../store/myStudyGroupsSlice.ts';
+import { addMyStudyGroup, resetMyStudyGroups, setMyStudyGroups } from '../store/myStudyGroupsSlice.ts';
 import { useNavigate } from 'react-router-dom';
 import './MainPage.css'
 import Swal from 'sweetalert2';
@@ -151,27 +151,27 @@ function MainPage() {
                     studyPassword: studyData.studyPassword
                 }),
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to create study');
-                }
-                return response.json();
-            })
-            .then(responseData => {
-                console.log("Response data:", responseData);
-                const studyId = responseData;
-                dispatch(addMyStudyGroup({
-                    studyId: studyId,
-                    studyName: studyData.studyName,
-                    description: studyData.description,
-                    emoji: studyData.emoji
-                }));
-                navigate(`/study/${studyId}`);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // 여기에 에러 처리 로직을 추가할 수 있습니다.
-            });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to create study');
+                    }
+                    return response.json();
+                })
+                .then(responseData => {
+                    console.log("Response data:", responseData);
+                    const studyId = responseData;
+                    dispatch(addMyStudyGroup({
+                        studyId: studyId,
+                        studyName: studyData.studyName,
+                        description: studyData.description,
+                        emoji: studyData.emoji
+                    }));
+                    navigate(`/study/${studyId}`);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // 여기에 에러 처리 로직을 추가할 수 있습니다.
+                });
         } catch (error) {
             console.error('Error creating study:', error);
             Swal.fire({
@@ -184,17 +184,17 @@ function MainPage() {
     };
 
     return (
-        <Container>
-            <Row className='mb-3'>
-                <Col xs="8">
-                    <TodayProgress />
-                </Col>
-                <Col xs="4">
-                    <Rank />
-                </Col>
-            </Row>
-            <Row>
-                <Col className="app-container mb-5">
+        <>
+            <Container fluid>
+                <div className="top-section">
+                    <div className="progress-bar-container">
+                        <TodayProgress />
+                    </div>
+                    <div className="rank-container">
+                        <Rank />
+                    </div>
+                </div>
+                <div className="app-container mt-3 mb-3">
                     <div className="title-button-container">
                         <h1 className="app-title">내 스터디 목록👀</h1>
                         {isLoggedIn && (
@@ -203,10 +203,10 @@ function MainPage() {
                             </Button>
                         )}
                     </div>
-                    { isLoggedIn ? (
-                        <StudyList 
-                            studies={myStudyGroups} 
-                            onStudyClick={handleStudyClick} 
+                    {isLoggedIn ? (
+                        <StudyList
+                            studies={myStudyGroups}
+                            onStudyClick={handleStudyClick}
                             isClickable={true}
                         />
                     ) : (
@@ -220,18 +220,16 @@ function MainPage() {
                             </p>
                         </div>
                     )}
-                </Col>
-            </Row>
-            <Row>
-                <div className="app-container">
+                </div>
+                <div className="app-container mt-4">
                     <h1 className="app-title">스터디 둘러보기🔎</h1>
-                    <StudyList 
-                        studies={allStudyGroups} 
-                        onStudyClick={handleStudyClick} 
+                    <StudyList
+                        studies={allStudyGroups}
+                        onStudyClick={handleStudyClick}
                         isClickable={isLoggedIn}
                     />
                 </div>
-            </Row>
+            </Container>
             <StudyJoinModal
                 show={showJoinModal}
                 onHide={() => setShowJoinModal(false)}
@@ -243,7 +241,7 @@ function MainPage() {
                 onHide={() => setShowCreateModal(false)}
                 onSubmit={handleCreateStudy}
             />
-        </Container>
+        </>
     );
 }
 

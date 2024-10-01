@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { OpenVidu } from 'openvidu-browser';
-import { useAppSelector } from '../store/hooks.ts';
-import { useParams } from 'react-router-dom';
+import { useAppSelector, useAppDispatch } from '../store/hooks.ts';
+import { setUser } from '../store/userSlice.ts';
 import { CiLogout } from "react-icons/ci";
 import { IoVideocam, IoVideocamOff } from "react-icons/io5";
 import { MdMic, MdMicOff } from "react-icons/md";
+import { useParams } from 'react-router-dom';
+import './OpenViduComponent.css'
+import StopWatch from '../component/StopWatch.jsx';
 
-import './CamStudyPage.css'
-
-const CamStudyPage = () => {
+const OpenViduComponent = () => {
     const { studyId } = useParams();
     const user = useAppSelector((state) => state.user);
+    const [time, setTime] = useState(0);
+    const dispatch = useAppDispatch();
 
     const [session, setSession] = useState(null);
     const [publisher, setPublisher] = useState(null);
@@ -22,6 +25,7 @@ const CamStudyPage = () => {
     const OV = useRef(new OpenVidu());
 
     useEffect(() => {
+        console.log(studyId);
         joinSession();
         return () => {
             if (session) {
@@ -115,13 +119,27 @@ const CamStudyPage = () => {
     };
 
     const leaveSession = () => {
-        if (session) {
-            session.disconnect();
-        }
-        setSession(null);
-        setPublisher(null);
-        setSubscribers([]);
-        window.close();
+        fetch('/members/updateTodayTime', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(time)
+        })
+        .then(()=>{
+            if (session) {
+                session.disconnect();
+            }
+            setSession(null);
+            setPublisher(null);
+            setSubscribers([]);
+    
+            window.close();
+        })
+        .catch(error => {
+            console.error('Error updating time:', error);
+            alert(time)
+        });
     };
 
     const toggleVideo = () => {
@@ -150,6 +168,7 @@ const CamStudyPage = () => {
 
     return (
         <div>
+            <StopWatch time={time} setTime={setTime}/>
             <div id="video-container">
                 {publisher && (
                     <div className="stream-container">
@@ -210,4 +229,4 @@ const UserVideoComponent = ({ streamManager }) => {
     );
 };
 
-export default CamStudyPage;
+export default OpenViduComponent;
